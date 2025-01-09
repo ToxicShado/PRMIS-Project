@@ -8,3 +8,5 @@
 /Process Control/Client/obj
 /Process Control/Server/bin/Debug/net9.0
 /Process Control/Server/obj
+
+*.pdf
