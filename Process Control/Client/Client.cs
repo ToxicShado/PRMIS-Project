@@ -8,13 +8,27 @@ namespace Client
     {
         public static void Main(string[] args)
         {
+
+            Socket tcpSocket = initialiseConnection();
+
+            // Test the connection by sending a message to the server
+            string message = "I Am Aliveeee";
+            byte[] messageData = Encoding.UTF8.GetBytes(message);
+            tcpSocket.Send(messageData);
+            tcpSocket.Close();
+
+            Console.ReadKey();
+        }
+
+        public static Socket initialiseConnection()
+        {
             // Create a UDP socket for initiating a connection
             Socket udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint serverEP = new IPEndPoint(IPAddress.Loopback, 25565);
 
             // Send a registration message to the server
             byte[] buffer = new byte[1024];
-            string registrationMessage = "CouldYouPleaseConnect";
+            string registrationMessage = "Could You Please Connect?";
             byte[] registrationData = Encoding.UTF8.GetBytes(registrationMessage);
             udpSocket.SendTo(registrationData, serverEP);
 
@@ -38,14 +52,7 @@ namespace Client
             // Connect to the server with the provided data
             tcpSocket.Connect(tcpServerEP);
 
-            // Test the connection by sending a message to the server
-            string message = "Hello from the client";
-            byte[] messageData = Encoding.UTF8.GetBytes(message);
-            tcpSocket.Send(messageData);
-            tcpSocket.Close();
-
-            Console.ReadKey();
+            return tcpSocket;
         }
-
     }
 }

@@ -11,3 +11,5 @@
 /Process Control/Server/bin/Debug/net9.0
 
 *.pdf
+/Process Control/Process/bin/Debug/net9.0
+/Process Control/Process/obj

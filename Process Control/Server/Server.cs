@@ -13,7 +13,18 @@ namespace Server
 
             Console.WriteLine("Pick whether you wish to use Round Robin (1) or to sort by priority (2)");
             int choice = -1;
-            int.TryParse(Console.ReadLine(), out choice);
+
+            // Keep asking for input until it's valid and either 1 or 2.
+            while (true)
+            {
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out choice) && (choice == 1 || choice == 2))
+                {
+                    break;
+                }
+                Console.WriteLine("Invalid input, please try again");
+            }
+
             Console.WriteLine($"Choice {choice}");
 
             switch (choice)
@@ -29,6 +40,25 @@ namespace Server
                     break;
             }
 
+            while (true) { 
+                Socket acceptedSocket = initialiseCommunication();
+
+                // The communication may now ensue, this is just a test
+                byte[] acceptedBuffer = new byte[1024];
+                int receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+                string receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                Console.WriteLine($"Received: {receivedMessage}");
+                acceptedSocket.Close();
+            }
+
+
+
+            Console.ReadKey();
+        }
+
+
+        public static Socket initialiseCommunication()
+        {
             // Create a UDP socket for initiating a connection
             Socket initialConnection = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint serverEP = new IPEndPoint(IPAddress.Any, 25565);
@@ -56,20 +86,10 @@ namespace Server
             initialConnection.Close();
 
             // Accept the TCP connection from the client
-            tcpSocket.Listen(1);
+            tcpSocket.Listen();
             Socket acceptedSocket = tcpSocket.Accept();
 
-            // The communication may now ensue, this is just a test
-            byte[] acceptedBuffer = new byte[1024];
-            int receivedBytes = acceptedSocket.Receive(acceptedBuffer);
-            string receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
-            Console.WriteLine($"Received: {receivedMessage}");
-            acceptedSocket.Close();
-
-
-
-            
-            Console.ReadKey();
+            return acceptedSocket;
         }
     }
 }
