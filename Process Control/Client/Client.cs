@@ -1,9 +1,7 @@
-﻿using System.Net.Sockets;
+﻿using Process;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using System.Drawing;
-using System.Diagnostics;
-using Process;
 
 
 namespace Client
@@ -13,7 +11,7 @@ namespace Client
         public static void Main(string[] args)
         {
 
-            Socket tcpSocket = initialiseConnection();
+            Socket tcpSocket = initialiseClientsideConnection();
 
             if (tcpSocket == null)
             {
@@ -28,7 +26,8 @@ namespace Client
 
             List<OSProcess> processes = new List<OSProcess>();
 
-            OSProcess process = createProcess();
+            //OSProcess process = OSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
+            OSProcess process = new OSProcess("Test", 10, 1, 1, 1); // so i will just create a process like this for now.
 
             processes.Add(process);
 
@@ -39,19 +38,19 @@ namespace Client
 
             tcpSocket.Receive(messageData);
 
-            if (Encoding.UTF8.GetString(messageData) == "OK")
+            if (Encoding.UTF8.GetString(messageData).StartsWith("OK"))
             {
                 Console.WriteLine("Process sent successfully");
                 processes.Remove(process);
             }
-            else if (Encoding.UTF8.GetString(messageData).Contains("ERR_0"))
+            else if (Encoding.UTF8.GetString(messageData).StartsWith("ERR_0"))
             {
                 Console.WriteLine("Failed to send process");
-                while (processes.Count > 0 && Encoding.UTF8.GetString(messageData) != "OK")
+                while (processes.Count > 0 && !Encoding.UTF8.GetString(messageData).StartsWith("OK"))
                 {
                     tcpSocket.Send(processes[0].toCSV());
                     tcpSocket.Receive(messageData);
-                    if (Encoding.UTF8.GetString(messageData) == "OK")
+                    if (Encoding.UTF8.GetString(messageData).StartsWith("OK"))
                     {
                         Console.WriteLine("Process sent successfully");
                         processes.Remove(processes[0]);
@@ -61,89 +60,18 @@ namespace Client
                         Console.WriteLine("Failed to send process");
                     }
                     Random random = new Random();
-                    Task.Delay(random.Next(100,2000)).Wait();
+                    Task.Delay(random.Next(100, 2000)).Wait();
                 }
             }
-
             tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
-
             tcpSocket.Close();
 
             Console.ReadKey();
         }
 
-        public static OSProcess createProcess()
-        {
-            string name = "";
-            int timeToComplete = 0;
-            int priority = 0;
-            double memory = 0;
-            double processor = 0;
 
-            Console.WriteLine("Creating a new process. Please enter the following details:");
 
-            // correct input must be gotten. we know users are not to be trusted
-            while (true)
-            {
-                Console.Write("Enter process name: ");
-                name = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(name))
-                {
-                    break;
-                }
-                Console.WriteLine("Process name cannot be empty. Please try again.");
-            }
-
-            // correct input must be gotten. we know users are not to be trusted
-            while (true)
-            {
-                Console.Write("Enter time to complete (positive integer): ");
-                if (int.TryParse(Console.ReadLine(), out timeToComplete) && timeToComplete > 0)
-                {
-                    break;
-                }
-                Console.WriteLine("Invalid input. Time to complete must be a positive integer. Please try again.");
-            }
-
-            // correct input must be gotten. we know users are not to be trusted
-            while (true)
-            {
-                Console.Write("Enter priority (positive integer): ");
-                if (int.TryParse(Console.ReadLine(), out priority) && priority > 0)
-                {
-                    break;
-                }
-                Console.WriteLine("Invalid input. Priority must be a positive integer. Please try again.");
-            }
-
-            // correct input must be gotten. we know users are not to be trusted
-            while (true)
-            {
-                Console.Write("Enter memory usage (positive double): ");
-                if (double.TryParse(Console.ReadLine(), out memory) && memory > 0)
-                {
-                    break;
-                }
-                Console.WriteLine("Invalid input. Memory usage must be a positive number. Please try again.");
-            }
-
-            // correct input must be gotten. we know users are not to be trusted
-            while (true)
-            {
-                Console.Write("Enter processor usage (positive double): ");
-                if (double.TryParse(Console.ReadLine(), out processor) && processor > 0)
-                {
-                    break;
-                }
-                Console.WriteLine("Invalid input. Processor usage must be a positive number. Please try again.");
-            }
-
-            Console.WriteLine("Process creation successful! (at last!)"); // maybe, just maybe, we should make some kind of an autofill
-            // and boy, are these try catches making the code be unreadable
-            return new OSProcess(name, timeToComplete, priority, memory, processor);
-        }
-
-        public static Socket initialiseConnection()
+        public static Socket initialiseClientsideConnection()
         {
             // Create a UDP socket for initiating a connection
             Socket udpSocket;
@@ -245,6 +173,7 @@ namespace Client
                 Console.WriteLine($"Exception {e}");
                 return null;
             }
+
             return tcpSocket;
         }
     }
