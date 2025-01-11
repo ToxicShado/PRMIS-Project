@@ -26,12 +26,46 @@ namespace Client
             byte[] messageData = Encoding.UTF8.GetBytes(message);
             tcpSocket.Send(messageData);
 
+            List<OSProcess> processes = new List<OSProcess>();
+
             OSProcess process = createProcess();
+
+            processes.Add(process);
 
             Console.WriteLine(Encoding.UTF8.GetChars(process.toCSV()));
 
 
             tcpSocket.Send(process.toCSV());
+
+            tcpSocket.Receive(messageData);
+
+            if (Encoding.UTF8.GetString(messageData) == "OK")
+            {
+                Console.WriteLine("Process sent successfully");
+                processes.Remove(process);
+            }
+            else if (Encoding.UTF8.GetString(messageData).Contains("ERR_0"))
+            {
+                Console.WriteLine("Failed to send process");
+                while (processes.Count > 0 && Encoding.UTF8.GetString(messageData) != "OK")
+                {
+                    tcpSocket.Send(processes[0].toCSV());
+                    tcpSocket.Receive(messageData);
+                    if (Encoding.UTF8.GetString(messageData) == "OK")
+                    {
+                        Console.WriteLine("Process sent successfully");
+                        processes.Remove(processes[0]);
+                    }
+                    else if (Encoding.UTF8.GetString(messageData).Contains("ERR_0"))
+                    {
+                        Console.WriteLine("Failed to send process");
+                    }
+                    Random random = new Random();
+                    Task.Delay(random.Next(100,2000)).Wait();
+                }
+            }
+
+            tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
 
             tcpSocket.Close();
 

@@ -12,34 +12,34 @@ namespace Server
             double procesorState = 0;
             double memoryState = 0;
 
-            Console.WriteLine("Pick whether you wish to use Round Robin (1) or to sort by priority (2)");
-            int choice = -1;
+            //Console.WriteLine("Pick whether you wish to use Round Robin (1) or to sort by priority (2)");
+            //int choice = -1;
 
-            // Keep asking for input until it's valid and either 1 or 2.
-            while (true)
-            {
-                string input = Console.ReadLine();
-                if (int.TryParse(input, out choice) && (choice == 1 || choice == 2))
-                {
-                    break;
-                }
-                Console.WriteLine("Invalid input, please try again");
-            }
+            //// Keep asking for input until it's valid and either 1 or 2.
+            //while (true)
+            //{
+            //    string input = Console.ReadLine();
+            //    if (int.TryParse(input, out choice) && (choice == 1 || choice == 2))
+            //    {
+            //        break;
+            //    }
+            //    Console.WriteLine("Invalid input, please try again");
+            //}
 
-            Console.WriteLine($"Choice {choice}");
+            //Console.WriteLine($"Choice {choice}");
 
-            switch (choice)
-            {
-                case 1:
-                    Console.WriteLine("Round Robin");
-                    break;
-                case 2:
-                    Console.WriteLine("Priority");
-                    break;
-                default:
-                    Console.WriteLine("Invalid choice");
-                    break;
-            }
+            //switch (choice)
+            //{
+            //    case 1:
+            //        Console.WriteLine("Round Robin");
+            //        break;
+            //    case 2:
+            //        Console.WriteLine("Priority");
+            //        break;
+            //    default:
+            //        Console.WriteLine("Invalid choice");
+            //        break;
+            //}
 
             while (true)
             {
@@ -60,20 +60,33 @@ namespace Server
                 while(receivedMessage != "END") { 
                     receivedBytes = acceptedSocket.Receive(acceptedBuffer);
 
-                    Console.WriteLine($"bytes? : {receivedBytes}");
+                    if(receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
+                    {
+                        receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                        Console.WriteLine($"Received: {receivedMessage}");
 
-                    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
-                    Console.WriteLine($"Received: {receivedMessage}");
-
-                    OSProcess process = new OSProcess();
-                    process = process.toProcess(acceptedBuffer, receivedBytes);
-                    Console.WriteLine(process.ToString());
+                        if(receivedMessage != "END") { // if the communication is stopped, we should just jump over it
+                            OSProcess process = new OSProcess();
+                            process = process.toProcess(acceptedBuffer, receivedBytes);
+                            Console.WriteLine(process.ToString());
+                            if(procesorState + process.processor <= 100 && memoryState + process.memory <= 100)
+                            {
+                                procesorState += process.processor;
+                                memoryState += process.memory;
+                                Console.WriteLine($"Processor state: {procesorState}, Memory state: {memoryState}");
+                                acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
+                            }
+                            else
+                            {
+                                Console.WriteLine("Process cannot be added due to resource constraints");
+                                acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints"));
+                            }
+                        }
+                    }
                 }
 
                 acceptedSocket.Close();
             }
-
-
 
             Console.ReadKey();
         }

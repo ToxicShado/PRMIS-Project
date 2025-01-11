@@ -4,11 +4,11 @@ namespace Process
 {
     public class OSProcess
     {
-        protected string name { get; private set; } = "";
-        protected int timeToComplete { get; private set; } = 0;
-        protected int priority { get; private set; } = 0;
-        protected double memory { get; private set; } = 0;
-        protected double processor { get; private set; } = 0;
+        public string name { get; private set; } = "";
+        public int timeToComplete { get; private set; } = 0;
+        public int priority { get; private set; } = 0;
+        public double memory { get; private set; } = 0;
+        public double processor { get; private set; } = 0;
 
         public OSProcess(string name, int timeToComplete, int priority, double memory, double processor)
         {
