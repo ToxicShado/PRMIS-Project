@@ -26,8 +26,10 @@ namespace Client
 
             List<OSProcess> processes = new List<OSProcess>();
 
-            //OSProcess process = OSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
-            OSProcess process = new OSProcess("Test", 10, 1, 1, 1); // so i will just create a process like this for now.
+            Random random = new Random();
+
+            //OSProcess process = OperationsOnOSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
+            OSProcess process = new OSProcess("Test", random.Next(1,5000), random.Next(0,9), random.Next(0,100), random.Next(0, 100)); // so i will just create a process like this for now.
 
             processes.Add(process);
 
@@ -59,7 +61,6 @@ namespace Client
                     {
                         Console.WriteLine("Failed to send process");
                     }
-                    Random random = new Random();
                     Task.Delay(random.Next(100, 2000)).Wait();
                 }
             }
@@ -69,6 +70,10 @@ namespace Client
             Console.ReadKey();
         }
 
+        public void SendProcess(OSProcess process, Socket socket)
+        {
+            socket.Send(process.toCSV());
+        }
 
 
         public static Socket initialiseClientsideConnection()

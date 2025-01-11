@@ -7,12 +7,9 @@ namespace Server
 {
     public class Server
     {
+        private static OS OS = new OS();
         public static void Main(string[] args)
         {
-            double procesorState = 0;
-            double memoryState = 0;
-            List<OSProcess> RunningProcesses = new List<OSProcess>();
-            List<OSProcess> WaitingProcesses = new List<OSProcess>();
 
             //This will be used to determine the scheduling algorithm, when we need it. Until then, it's commented out.
 
@@ -89,11 +86,11 @@ namespace Server
 
                         if (receivedMessage != "END") // if the communication is stopped, we should just jump over it
                         {
-                            OSProcess process = OSProcess.toProcess(acceptedBuffer, receivedBytes);
+                            OSProcess process = OperationsOnOSProcess.toProcess(acceptedBuffer, receivedBytes);
                             Console.WriteLine(process.ToString());
-                            if (procesorState + process.processor <= 100 && memoryState + process.memory <= 100)
+                            if (OS.isTherePlaceForNewProcess(process))
                             {
-                                WaitingProcesses.Add(process);
+                                OS.AddNewProcess(process);
                                 acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
                             }
                             else
