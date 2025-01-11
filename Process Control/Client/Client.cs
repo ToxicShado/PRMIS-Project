@@ -10,7 +10,6 @@ namespace Client
     {
         public static void Main(string[] args)
         {
-
             Socket tcpSocket = initialiseClientsideConnection();
 
             if (tcpSocket == null)
@@ -18,12 +17,13 @@ namespace Client
                 Console.WriteLine("Connection failed");
                 return;
             }
-
+             
             // Test the connection by sending a message to the server
             string message = "I Am Aliveeee";
-            byte[] messageData = Encoding.UTF8.GetBytes(message);
+            byte[] messageData = new byte[4096];
+            messageData = Encoding.UTF8.GetBytes(message);
             tcpSocket.Send(messageData);
-
+            
             List<OSProcess> processes = new List<OSProcess>();
 
             Random random = new Random();
@@ -34,47 +34,43 @@ namespace Client
             processes.Add(process);
 
             Console.WriteLine(Encoding.UTF8.GetChars(process.toCSV()));
+            
+                
 
+            tcpSocket.Send(processes[0].toCSV());
 
-            tcpSocket.Send(process.toCSV());
-
+            messageData = new byte[4096];
             tcpSocket.Receive(messageData);
+            string receivedMessage = Encoding.UTF8.GetString(messageData);
+            do
+            {
 
-            if (Encoding.UTF8.GetString(messageData).StartsWith("OK"))
-            {
-                Console.WriteLine("Process sent successfully");
-                processes.Remove(process);
-            }
-            else if (Encoding.UTF8.GetString(messageData).StartsWith("ERR_0"))
-            {
-                Console.WriteLine("Failed to send process");
-                while (processes.Count > 0 && !Encoding.UTF8.GetString(messageData).StartsWith("OK"))
+                System.Console.WriteLine(receivedMessage);
+                if (receivedMessage.StartsWith("OK"))
                 {
-                    tcpSocket.Send(processes[0].toCSV());
-                    tcpSocket.Receive(messageData);
-                    if (Encoding.UTF8.GetString(messageData).StartsWith("OK"))
-                    {
-                        Console.WriteLine("Process sent successfully");
-                        processes.Remove(processes[0]);
-                    }
-                    else if (Encoding.UTF8.GetString(messageData).Contains("ERR_0"))
-                    {
-                        Console.WriteLine("Failed to send process");
-                    }
-                    Task.Delay(random.Next(100, 2000)).Wait();
+                    Console.WriteLine("Process sent successfully");
+                    processes.Remove(processes[0]);
+                    break;
                 }
-            }
+                else if (receivedMessage.StartsWith("ERR_0"))
+                {
+                    Console.WriteLine("Failed to send process");
+                    Task.Delay(random.Next(500, 2000)).Wait();
+                    tcpSocket.Send(processes[0].toCSV());
+                    messageData = new byte[4096];
+                    tcpSocket.Receive(messageData);
+
+                    receivedMessage = "";
+                    receivedMessage = Encoding.UTF8.GetString(messageData);
+                }
+                Task.Delay(1000).Wait();
+            } while (processes.Count > 0);
+            
             tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
-            tcpSocket.Close();
+            //tcpSocket.Close();
 
             Console.ReadKey();
         }
-
-        public void SendProcess(OSProcess process, Socket socket)
-        {
-            socket.Send(process.toCSV());
-        }
-
 
         public static Socket initialiseClientsideConnection()
         {
@@ -127,7 +123,7 @@ namespace Client
             // Receive the IP and port of the TCP socket from the server
             EndPoint serverResponseEndpoint = new IPEndPoint(IPAddress.Any, 0);
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4096];
             int receivedBytes = 0;
             try
             {
