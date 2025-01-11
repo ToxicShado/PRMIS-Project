@@ -29,7 +29,7 @@ namespace Server
             return false;
         }
 
-        public void addProcess(OSProcess process)
+        public void AddNewProcess(OSProcess process)
         {
             RunningProcesses.Add(new Tuple<OSProcess, DateTime>(process, DateTime.Now));
             processorState += process.processor;
