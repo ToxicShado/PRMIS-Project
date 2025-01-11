@@ -13,11 +13,22 @@ namespace Server
         public double memoryState { get; private set; }
         public List<Tuple<OSProcess, DateTime>> RunningProcesses { get; private set; }
 
-        public OS()
+        private static OS instance = null;
+
+        private OS()
         {
             processorState = 0;
             memoryState = 0;
             RunningProcesses = new List<Tuple<OSProcess, DateTime>>();
+        }
+
+        public static OS getInstance()
+        {
+            if (instance == null)
+            {
+                instance = new OS();
+            }
+            return instance;
         }
 
         public bool isTherePlaceForNewProcess(OSProcess process)

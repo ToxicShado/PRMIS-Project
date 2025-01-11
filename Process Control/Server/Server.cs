@@ -7,7 +7,7 @@ namespace Server
 {
     public class Server
     {
-        private static OS OS = new OS();
+        private static OS OS = OS.getInstance();
         public static void Main(string[] args)
         {
 
