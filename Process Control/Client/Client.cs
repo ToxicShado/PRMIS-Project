@@ -2,6 +2,9 @@
 using System.Net;
 using System.Text;
 using System.Drawing;
+using System.Diagnostics;
+using Process;
+
 
 namespace Client
 {
@@ -22,9 +25,88 @@ namespace Client
             string message = "I Am Aliveeee";
             byte[] messageData = Encoding.UTF8.GetBytes(message);
             tcpSocket.Send(messageData);
+
+            OSProcess process = createProcess();
+
+            Console.WriteLine(Encoding.UTF8.GetChars(process.toCSV()));
+
+
+            tcpSocket.Send(process.toCSV());
+
             tcpSocket.Close();
 
             Console.ReadKey();
+        }
+
+        public static OSProcess createProcess()
+        {
+            string name = "";
+            int timeToComplete = 0;
+            int priority = 0;
+            double memory = 0;
+            double processor = 0;
+
+            Console.WriteLine("Creating a new process. Please enter the following details:");
+
+            // correct input must be gotten. we know users are not to be trusted
+            while (true)
+            {
+                Console.Write("Enter process name: ");
+                name = Console.ReadLine();
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    break;
+                }
+                Console.WriteLine("Process name cannot be empty. Please try again.");
+            }
+
+            // correct input must be gotten. we know users are not to be trusted
+            while (true)
+            {
+                Console.Write("Enter time to complete (positive integer): ");
+                if (int.TryParse(Console.ReadLine(), out timeToComplete) && timeToComplete > 0)
+                {
+                    break;
+                }
+                Console.WriteLine("Invalid input. Time to complete must be a positive integer. Please try again.");
+            }
+
+            // correct input must be gotten. we know users are not to be trusted
+            while (true)
+            {
+                Console.Write("Enter priority (positive integer): ");
+                if (int.TryParse(Console.ReadLine(), out priority) && priority > 0)
+                {
+                    break;
+                }
+                Console.WriteLine("Invalid input. Priority must be a positive integer. Please try again.");
+            }
+
+            // correct input must be gotten. we know users are not to be trusted
+            while (true)
+            {
+                Console.Write("Enter memory usage (positive double): ");
+                if (double.TryParse(Console.ReadLine(), out memory) && memory > 0)
+                {
+                    break;
+                }
+                Console.WriteLine("Invalid input. Memory usage must be a positive number. Please try again.");
+            }
+
+            // correct input must be gotten. we know users are not to be trusted
+            while (true)
+            {
+                Console.Write("Enter processor usage (positive double): ");
+                if (double.TryParse(Console.ReadLine(), out processor) && processor > 0)
+                {
+                    break;
+                }
+                Console.WriteLine("Invalid input. Processor usage must be a positive number. Please try again.");
+            }
+
+            Console.WriteLine("Process creation successful! (at last!)"); // maybe, just maybe, we should make some kind of an autofill
+            // and boy, are these try catches making the code be unreadable
+            return new OSProcess(name, timeToComplete, priority, memory, processor);
         }
 
         public static Socket initialiseConnection()

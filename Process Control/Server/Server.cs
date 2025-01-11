@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Process;
 
 namespace Server
 {
@@ -55,6 +56,20 @@ namespace Server
                 int receivedBytes = acceptedSocket.Receive(acceptedBuffer);
                 string receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
                 Console.WriteLine($"Received: {receivedMessage}");
+
+                while(receivedMessage != "END") { 
+                    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+
+                    Console.WriteLine($"bytes? : {receivedBytes}");
+
+                    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                    Console.WriteLine($"Received: {receivedMessage}");
+
+                    OSProcess process = new OSProcess();
+                    process = process.toProcess(acceptedBuffer, receivedBytes);
+                    Console.WriteLine(process.ToString());
+                }
+
                 acceptedSocket.Close();
             }
 
