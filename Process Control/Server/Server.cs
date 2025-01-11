@@ -1,7 +1,7 @@
-﻿using System.Net.Sockets;
+﻿using Process;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using Process;
 
 namespace Server
 {
@@ -11,6 +11,10 @@ namespace Server
         {
             double procesorState = 0;
             double memoryState = 0;
+            List<OSProcess> RunningProcesses = new List<OSProcess>();
+            List<OSProcess> WaitingProcesses = new List<OSProcess>();
+
+            //This will be used to determine the scheduling algorithm, when we need it. Until then, it's commented out.
 
             //Console.WriteLine("Pick whether you wish to use Round Robin (1) or to sort by priority (2)");
             //int choice = -1;
@@ -43,37 +47,53 @@ namespace Server
 
             while (true)
             {
-                Socket acceptedSocket = initialiseCommunication();
+                Socket acceptedSocket = initialiseServersideCommunication();
 
                 if (acceptedSocket == null)
                 {
                     Console.WriteLine("Connection failed");
                     return;
                 }
+                else
+                {
+                    Console.WriteLine("Connection successful");
+                }
+
+                byte[] acceptedBuffer;
+                int receivedBytes;
+                string receivedMessage;
 
                 // The communication may now ensue, this is just a test
-                byte[] acceptedBuffer = new byte[1024];
-                int receivedBytes = acceptedSocket.Receive(acceptedBuffer);
-                string receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
-                Console.WriteLine($"Received: {receivedMessage}");
+                try { 
+                    acceptedBuffer = new byte[1024];
+                    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+                    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                    Console.WriteLine($"Received: {receivedMessage}");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed to receive the initial message from the client.");
+                    Console.WriteLine($"Exception: {e}");
+                    return;
+                }
 
-                while(receivedMessage != "END") { 
+
+                while (receivedMessage != "END")
+                {
                     receivedBytes = acceptedSocket.Receive(acceptedBuffer);
 
-                    if(receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
+                    if (receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
                     {
                         receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
                         Console.WriteLine($"Received: {receivedMessage}");
 
-                        if(receivedMessage != "END") { // if the communication is stopped, we should just jump over it
-                            OSProcess process = new OSProcess();
-                            process = process.toProcess(acceptedBuffer, receivedBytes);
+                        if (receivedMessage != "END") // if the communication is stopped, we should just jump over it
+                        {
+                            OSProcess process = OSProcess.toProcess(acceptedBuffer, receivedBytes);
                             Console.WriteLine(process.ToString());
-                            if(procesorState + process.processor <= 100 && memoryState + process.memory <= 100)
+                            if (procesorState + process.processor <= 100 && memoryState + process.memory <= 100)
                             {
-                                procesorState += process.processor;
-                                memoryState += process.memory;
-                                Console.WriteLine($"Processor state: {procesorState}, Memory state: {memoryState}");
+                                WaitingProcesses.Add(process);
                                 acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
                             }
                             else
@@ -82,17 +102,20 @@ namespace Server
                                 acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints"));
                             }
                         }
+                        else
+                        {
+                            Console.WriteLine("Connection closed by Client request successfully");
+                            acceptedSocket.Close();
+                        }
                     }
+
+                    // theoretically implement exiting the code, if the client sends "ENDALL"
                 }
-
-                acceptedSocket.Close();
             }
-
-            Console.ReadKey();
         }
 
 
-        public static Socket initialiseCommunication()
+        public static Socket initialiseServersideCommunication()
         {
             Socket initialConnection;
             IPEndPoint serverEP;
@@ -112,6 +135,7 @@ namespace Server
             {
                 serverEP = new IPEndPoint(IPAddress.Any, 25565);
                 initialConnection.Bind(serverEP);
+                Console.WriteLine("Server is ready and awaiting a new connection.");
             }
             catch (Exception e)
             {
