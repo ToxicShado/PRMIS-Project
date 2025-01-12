@@ -17,25 +17,25 @@ namespace Client
                 Console.WriteLine("Connection failed");
                 return;
             }
-             
+
             // Test the connection by sending a message to the server
             string message = "I Am Aliveeee";
             byte[] messageData = new byte[4096];
             messageData = Encoding.UTF8.GetBytes(message);
             tcpSocket.Send(messageData);
-            
+
             List<OSProcess> processes = new List<OSProcess>();
 
             Random random = new Random();
 
             //OSProcess process = OperationsOnOSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
-            OSProcess process = new OSProcess("Test", random.Next(1000,5000), random.Next(0,9), random.Next(0,100), random.Next(0, 100)); // so i will just create a process like this for now.
+            OSProcess process = new OSProcess("Test", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 100), random.Next(1, 100)); // so i will just create a process like this for now.
 
             processes.Add(process);
 
             Console.WriteLine(Encoding.UTF8.GetChars(process.toCSV()));
-            
-                
+
+
 
             tcpSocket.Send(processes[0].toCSV());
 
@@ -64,7 +64,7 @@ namespace Client
                 }
                 Task.Delay(500).Wait();
             } while (processes.Count > 0);
-            
+
             tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
             //tcpSocket.Close();
 

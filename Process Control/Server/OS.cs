@@ -1,10 +1,4 @@
 ﻿using Process;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Server
 {
@@ -15,8 +9,6 @@ namespace Server
         public List<Tuple<OSProcess, DateTime>> RunningProcesses { get; private set; }
         private static OS instance = null;
         private readonly Mutex mutex;
-
-
 
         private OS()
         {
@@ -30,9 +22,10 @@ namespace Server
                 while (true)
                 {
                     removeProcessIfFinished();
-                    Thread.Sleep(100);
+                    Thread.Sleep(50);
                 }
-            }) { IsBackground = true };
+            })
+            { IsBackground = true };
 
             backgroundThread.Start();
         }
@@ -73,6 +66,8 @@ namespace Server
                 RunningProcesses.Add(new Tuple<OSProcess, DateTime>(process, DateTime.Now));
                 processorState += process.processor;
                 memoryState += process.memory;
+                Console.WriteLine($"Process {process.ToString()} has started running.");
+                PrintCurrentlyRunningProcesses();
             }
             finally
             {
@@ -92,21 +87,43 @@ namespace Server
                     if (DateTime.Now - process.Item2 > TimeSpan.FromMilliseconds(process.Item1.timeToComplete))
                     {
                         ProccessesToRemove.Add(process);
-                        processorState -= process.Item1.processor;
-                        memoryState -= process.Item1.memory;
-                        Console.WriteLine($"Process {process.ToString()} removed.");
-                        Console.WriteLine($"[NEW] OS State => Processor : {processorState} Memory : {memoryState}");
                     }
                 }
                 foreach (Tuple<OSProcess, DateTime> process in ProccessesToRemove)
                 {
                     RunningProcesses.Remove(process);
+                    processorState -= process.Item1.processor;
+                    memoryState -= process.Item1.memory;
+                    Console.WriteLine($"Process {process.ToString()} has stopped running.");
                 }
+                if (ProccessesToRemove.Count > 0)
+                    PrintCurrentlyRunningProcesses();
             }
             finally
             {
                 mutex.ReleaseMutex();
             }
+        }
+
+        public void PrintCurrentlyRunningProcesses()
+        {
+            if (RunningProcesses.Count == 0)
+            {
+                Console.WriteLine("=================================================================================================");
+                Console.WriteLine("No processes are currently running.");
+            }
+            else
+            {
+                Console.WriteLine("=================================================================================================");
+                Console.WriteLine("Currently running process list : ");
+                foreach (Tuple<OSProcess, DateTime> runningProcess in RunningProcesses)
+                {
+                    Console.WriteLine($"{runningProcess.Item1.ToString()} added on {runningProcess.Item2.ToShortTimeString()}");
+                }
+            }
+            Console.WriteLine("=================================================================================================");
+            Console.WriteLine($"OS State => Processor : {processorState} Memory : {memoryState}");
+            Console.WriteLine("=================================================================================================");
         }
 
     }

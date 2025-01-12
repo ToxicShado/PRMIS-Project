@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace Process
 {
@@ -37,7 +33,7 @@ namespace Process
             double memory;
             double processor;
 
-            bool one = int.TryParse(parts[1],out timeToComplete);
+            bool one = int.TryParse(parts[1], out timeToComplete);
             bool two = int.TryParse(parts[2], out priority);
             bool three = double.TryParse(parts[3], out memory);
             bool four = double.TryParse(parts[4], out processor);
