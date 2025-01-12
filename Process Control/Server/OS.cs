@@ -108,41 +108,52 @@ namespace Server
 
         public void PrintCurrentlyRunningProcesses()
         {
-            Console.WriteLine("\n==================================================================================================");
-
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.WriteLine("╔════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║                                          THE TASK MANAGER                              _   \u25A1   ×   ║");
+            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+            Console.WriteLine("╟════════════════════════════════════════════════════════════════════════════════════════════════════╢");
+            Console.WriteLine("║                                  Currently Running Process List                                    ║");
             if (RunningProcesses.Count == 0)
             {
-                Console.WriteLine("| No processes are currently running.                                                            |");
-                Console.WriteLine("==================================================================================================");
+                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+                Console.WriteLine("║                  No processes are currently running. Use your system efficiently!                  ║");
+                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
             }
             else
             {
-                Console.WriteLine("|                                 Currently Running Process List                                 |");
-                Console.WriteLine("==================================================================================================");
-
+                Console.WriteLine("╠══════════════════════╤═════════════════╤══════════════════╤════════════╤════════════╤══════════════╣");
                 // Print the table header
-                Console.WriteLine(string.Format("| {0,-20} | {1,-15} | {2,-16} | {3,-10} | {4,-10} | {5,-8}|",
-            "Name", "Added On", "Time to Complete", "Priority", "Memory", "Processor"));
-                Console.WriteLine("--------------------------------------------------------------------------------------------------");
+                Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
+                    "Name", "Added On", "Time to Complete", "Priority", "Memory", "Processor"));
+                Console.WriteLine("╟──────────────────────┼─────────────────┼──────────────────┼────────────┼────────────┼──────────────╢");
 
                 // Print each process as a row in the table
                 foreach (var runningProcess in RunningProcesses)
                 {
-                    Console.WriteLine(string.Format("| {0,-20} | {1,-15} | {2,-16} | {3,-10} | {4,-10} | {5,-9}|",
+                    Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
                         runningProcess.Item1.name,
-                        runningProcess.Item2.ToShortTimeString(),
-                        runningProcess.Item1.timeToComplete,
+                        runningProcess.Item2.ToLongTimeString(),
+                        runningProcess.Item1.timeToComplete.ToString() + "ms",
                         runningProcess.Item1.priority,
-                        runningProcess.Item1.memory,
-                        runningProcess.Item1.processor));
+                        runningProcess.Item1.memory.ToString() + "%",
+                        runningProcess.Item1.processor.ToString() + "%"));
                 }
 
-                Console.WriteLine("==================================================================================================");
+                Console.WriteLine("╟══════════════════════╧═════════════════╧══════════════════╧════════════╧════════════╧══════════════╢");
             }
 
             // Print OS state summary
-            Console.WriteLine(string.Format("| {0,-94} |", "OS State => Processor: " + processorState + "% , Memory: " + memoryState + "%"));
-            Console.WriteLine("==================================================================================================\n");
+            Console.WriteLine("╟════════════════════════════════════════════════════════════════════════════════════════════════════╢");
+            Console.WriteLine("║                                        The Current OS Usage                                        ║");
+            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+            string processor = $"║ Processor Usage: [{new string('#', (int)(processorState / ((double)100 / 74)))}{new string('-', 74 - (int)(processorState / ((double)100 / 74)))}] {processorState}%"
+                + (processorState < 10 ? "   ║" : (processorState == 100) ? " ║" : "  ║");
+            Console.WriteLine(processor);
+            string memory = $"║ Memory Usage   : [{new string('#', (int)(memoryState / ((double)100 / 74)))}{new string('-', 74 - (int)(memoryState / ((double)100 / 74)))}] {memoryState}%"
+                + (memoryState < 10 ? "   ║" : (memoryState == 100) ? " ║" : "  ║");
+            Console.WriteLine(memory);
+            Console.WriteLine("╚════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
         }
 
 
