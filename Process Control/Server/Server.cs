@@ -79,8 +79,17 @@ namespace Server
 
                 while (true)
                 {
-
-                    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+                    try 
+                    { 
+                        receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("[ERROR] Failed to receive the message from the client."); // connection likely closed?
+                        Console.WriteLine($"[EXCEPTION] {e}");
+                        receivedBytes = 0;
+                        break;
+                    }
 
                     if (receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
                     {
