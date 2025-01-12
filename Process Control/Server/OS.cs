@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Server
@@ -12,10 +13,10 @@ namespace Server
         public double processorState { get; private set; }
         public double memoryState { get; private set; }
         public List<Tuple<OSProcess, DateTime>> RunningProcesses { get; private set; }
-
         private static OS instance = null;
-
         private readonly Mutex mutex;
+
+
 
         private OS()
         {
@@ -23,6 +24,17 @@ namespace Server
             memoryState = 0;
             RunningProcesses = new List<Tuple<OSProcess, DateTime>>();
             mutex = new Mutex();
+
+            Thread backgroundThread = new Thread(() =>
+            {
+                while (true)
+                {
+                    removeProcessIfFinished();
+                    Thread.Sleep(100);
+                }
+            }) { IsBackground = true };
+
+            backgroundThread.Start();
         }
 
         public static OS getInstance()
@@ -74,14 +86,21 @@ namespace Server
             try
             {
                 mutex.WaitOne();
+                var ProccessesToRemove = new List<Tuple<OSProcess, DateTime>>();
                 foreach (Tuple<OSProcess, DateTime> process in RunningProcesses)
                 {
                     if (DateTime.Now - process.Item2 > TimeSpan.FromMilliseconds(process.Item1.timeToComplete))
                     {
-                        RunningProcesses.Remove(process);
+                        ProccessesToRemove.Add(process);
                         processorState -= process.Item1.processor;
                         memoryState -= process.Item1.memory;
+                        Console.WriteLine($"Process {process.ToString()} removed.");
+                        Console.WriteLine($"[NEW] OS State => Processor : {processorState} Memory : {memoryState}");
                     }
+                }
+                foreach (Tuple<OSProcess, DateTime> process in ProccessesToRemove)
+                {
+                    RunningProcesses.Remove(process);
                 }
             }
             finally
@@ -89,6 +108,7 @@ namespace Server
                 mutex.ReleaseMutex();
             }
         }
+
     }
 }
 

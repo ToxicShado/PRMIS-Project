@@ -29,7 +29,7 @@ namespace Client
             Random random = new Random();
 
             //OSProcess process = OperationsOnOSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
-            OSProcess process = new OSProcess("Test", random.Next(1,5000), random.Next(0,9), random.Next(0,100), random.Next(0, 100)); // so i will just create a process like this for now.
+            OSProcess process = new OSProcess("Test", random.Next(1000,5000), random.Next(0,9), random.Next(0,100), random.Next(0, 100)); // so i will just create a process like this for now.
 
             processes.Add(process);
 

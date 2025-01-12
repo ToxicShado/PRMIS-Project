@@ -99,6 +99,8 @@ namespace Server
                                 Console.WriteLine("Process cannot be added due to resource constraints");
                                 acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints\n"));
                             }
+                            Console.WriteLine($"Current OS state Processor : {OS.processorState} Memory : {OS.memoryState}");
+
                         }
                         else
                         {
