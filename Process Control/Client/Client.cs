@@ -33,11 +33,11 @@ namespace Client
             //OSProcess process = OperationsOnOSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
 
             // so i will just create a processes like this for now.
-            OSProcess process = new OSProcess("Test", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process1 = new OSProcess("Test1", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process2 = new OSProcess("Test2", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process3 = new OSProcess("Test3", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process4 = new OSProcess("Test4", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
+            OSProcess process = new OSProcess("Test", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 100), random.Next(1, 100));
+            OSProcess process1 = new OSProcess("Test1", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 100), random.Next(1, 100));
+            OSProcess process2 = new OSProcess("Test2", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 100), random.Next(1, 100));
+            OSProcess process3 = new OSProcess("Test3", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 100), random.Next(1, 100));
+            OSProcess process4 = new OSProcess("Test4", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 100), random.Next(1, 100));
 
             processes.Add(process);
             processes.Add(process1);
@@ -45,12 +45,14 @@ namespace Client
             processes.Add(process3);
             processes.Add(process4);
 
+            Console.WriteLine("==========================================================");
             Console.WriteLine("[INFO] Sending the following processes:");
             Console.WriteLine(Encoding.UTF8.GetChars(process.toCSV()));
             Console.WriteLine(Encoding.UTF8.GetChars(process1.toCSV()));
             Console.WriteLine(Encoding.UTF8.GetChars(process2.toCSV()));
             Console.WriteLine(Encoding.UTF8.GetChars(process3.toCSV()));
             Console.WriteLine(Encoding.UTF8.GetChars(process4.toCSV()));
+            Console.WriteLine("==========================================================");
 
             tcpSocket.Send(processes[0].toCSV());
             Console.WriteLine($"[STATUS] Sent first process {processes[0]} to server.");
