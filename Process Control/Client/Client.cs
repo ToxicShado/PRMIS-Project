@@ -99,8 +99,11 @@ namespace Client
             tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
             Console.WriteLine("[STATUS] All processes sent. Closing connection.");
             //tcpSocket.Close();
-
+            
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\nPress any key (on the keyboard) to exit.");
             Console.ReadKey();
+            Console.ResetColor();
         }
 
         public static Socket initialiseClientsideConnection()

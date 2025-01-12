@@ -29,6 +29,7 @@ namespace Server
             { IsBackground = true };
 
             backgroundThread.Start();
+
         }
 
         public static OS getInstance()
@@ -117,72 +118,88 @@ namespace Server
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                  Currently Running Process List                                    ║");
-            if (RunningProcesses.Count == 0)
+            try 
             {
-                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-                Console.WriteLine("║                                 No processes are currently running                                 ║");
-                Console.WriteLine("║                        ProTip: Add a process to make the system productive!                        ║");
-                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-
-            }
-            else
-            {
-                Console.WriteLine("╠══════════════════════╤═════════════════╤══════════════════╤════════════╤════════════╤══════════════╣");
-                // Print the table header
-                Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
-                    "Name", "Added On", "Time to Complete", "Priority", "Memory", "Processor"));
-                Console.WriteLine("╟──────────────────────┼─────────────────┼──────────────────┼────────────┼────────────┼──────────────╢");
-
-                // Print each process as a row in the table
-                foreach (var runningProcess in RunningProcesses)
+                mutex.WaitOne();
+                if (RunningProcesses.Count == 0)
                 {
+                    Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+                    Console.WriteLine("║                                 No processes are currently running                                 ║");
+                    Console.WriteLine("║                        ProTip: Add a process to make the system productive!                        ║");
+                    Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+
+                }
+                else
+                {
+                    Console.WriteLine("╠══════════════════════╤═════════════════╤══════════════════╤════════════╤════════════╤══════════════╣");
+                    // Print the table header
                     Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
-                        runningProcess.Item1.name,
-                        runningProcess.Item2.ToLongTimeString(),
-                        runningProcess.Item1.timeToComplete.ToString() + "ms",
-                        runningProcess.Item1.priority,
-                        runningProcess.Item1.memory.ToString() + "%",
-                        runningProcess.Item1.processor.ToString() + "%"));
+                        "Name", "Added On", "Time to Complete", "Priority", "Memory", "Processor"));
+                    Console.WriteLine("╟──────────────────────┼─────────────────┼──────────────────┼────────────┼────────────┼──────────────╢");
+
+                    // Print each process as a row in the table
+                    foreach (var runningProcess in RunningProcesses)
+                    {
+                        Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
+                            runningProcess.Item1.name,
+                            runningProcess.Item2.ToLongTimeString(),
+                            runningProcess.Item1.timeToComplete.ToString() + "ms",
+                            runningProcess.Item1.priority,
+                            runningProcess.Item1.memory.ToString() + "%",
+                            runningProcess.Item1.processor.ToString() + "%"));
+                    }
+
+                    Console.WriteLine("╠══════════════════════╧═════════════════╧══════════════════╧════════════╧════════════╧══════════════╣");
+                    Console.ResetColor();
                 }
 
-                Console.WriteLine("╠══════════════════════╧═════════════════╧══════════════════╧════════════╧════════════╧══════════════╣");
+                // Print OS state summary
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+                Console.WriteLine("║                                        The Current OS Usage                                        ║");
+                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+
+                Console.Write("║ ");
+                if (processorState <= 50)
+                    Console.ForegroundColor = ConsoleColor.Green; // Low usage
+                else if (processorState <= 75)
+                    Console.ForegroundColor = ConsoleColor.DarkYellow; // Medium usage
+                else
+                    Console.ForegroundColor = ConsoleColor.Red; // High usage
+                string processor = $"Processor Usage: [{new string('■', (int)(processorState / ((double)100 / 74)))}{new string('-', 74 - (int)(processorState / ((double)100 / 74)))}] {processorState}%";
+                Console.Write(processor);
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine(processorState < 10 ? "   ║" : (processorState == 100) ? " ║" : "  ║");
+
+                Console.Write("║ ");
+                if (memoryState <= 50)
+                    Console.ForegroundColor = ConsoleColor.Green; // Low usage
+                else if (memoryState <= 75)
+                    Console.ForegroundColor = ConsoleColor.DarkYellow; // Medium usage
+                else
+                    Console.ForegroundColor = ConsoleColor.Red; // High usage
+
+                string memory = $"Memory Usage   : [{new string('■', (int)(memoryState / ((double)100 / 74)))}{new string('-', 74 - (int)(memoryState / ((double)100 / 74)))}] {memoryState}%";
+                Console.Write(memory);
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine(memoryState < 10 ? "   ║" : (memoryState == 100) ? " ║" : "  ║");
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("╚════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
                 Console.ResetColor();
             }
-
-            // Print OS state summary
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-            Console.WriteLine("║                                        The Current OS Usage                                        ║");
-            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-            
-            Console.Write("║ "); 
-            if (processorState <= 50)
-                Console.ForegroundColor = ConsoleColor.Green; // Low usage
-            else if (processorState <= 75)
-                Console.ForegroundColor = ConsoleColor.DarkYellow; // Medium usage
-            else
-                Console.ForegroundColor = ConsoleColor.Red; // High usage
-            string processor = $"Processor Usage: [{new string('■', (int)(processorState / ((double)100 / 74)))}{new string('-', 74 - (int)(processorState / ((double)100 / 74)))}] {processorState}%";
-            Console.Write(processor);
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine(processorState < 10 ? "   ║" : (processorState == 100) ? " ║" : "  ║");
-
-            Console.Write("║ ");
-            if (memoryState <= 50)
-                Console.ForegroundColor = ConsoleColor.Green; // Low usage
-            else if (memoryState <= 75)
-                Console.ForegroundColor = ConsoleColor.DarkYellow; // Medium usage
-            else
-                Console.ForegroundColor = ConsoleColor.Red; // High usage
-
-            string memory = $"Memory Usage   : [{new string('■', (int)(memoryState / ((double)100 / 74)))}{new string('-', 74 - (int)(memoryState / ((double)100 / 74)))}] {memoryState}%";
-            Console.Write(memory);
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine(memoryState < 10 ? "   ║" : (memoryState == 100) ? " ║" : "  ║");
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("╚════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
-            Console.ResetColor();
+            catch (Exception e)
+            {
+                Console.ResetColor();
+                Console.WriteLine($"[EXCEPTION] Error printing currently running processes: {e.Message}");
+            }
+            finally
+            {
+                Console.ResetColor();
+                mutex.ReleaseMutex();
+            }
         }
+
+        
 
 
 
