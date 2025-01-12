@@ -1,4 +1,5 @@
 ﻿using Process;
+using System.Diagnostics;
 
 namespace Server
 {
@@ -66,7 +67,7 @@ namespace Server
                 RunningProcesses.Add(new Tuple<OSProcess, DateTime>(process, DateTime.Now));
                 processorState += process.processor;
                 memoryState += process.memory;
-                Console.WriteLine($"Process {process.ToString()} has started running.");
+                Console.WriteLine($"[OS] Process {process.ToString()} has started running.");
                 PrintCurrentlyRunningProcesses();
             }
             finally
@@ -94,7 +95,7 @@ namespace Server
                     RunningProcesses.Remove(process);
                     processorState -= process.Item1.processor;
                     memoryState -= process.Item1.memory;
-                    Console.WriteLine($"Process {process.ToString()} has stopped running.");
+                    Console.WriteLine($"[OS] Process {process.ToString()} has stopped running.");
                 }
                 if (ProccessesToRemove.Count > 0)
                     PrintCurrentlyRunningProcesses();
@@ -107,24 +108,44 @@ namespace Server
 
         public void PrintCurrentlyRunningProcesses()
         {
+            Console.WriteLine("\n==================================================================================================");
+
             if (RunningProcesses.Count == 0)
             {
-                Console.WriteLine("\n=================================================================================================");
-                Console.WriteLine("No processes are currently running.");
+                Console.WriteLine("| No processes are currently running.                                                            |");
+                Console.WriteLine("==================================================================================================");
             }
             else
             {
-                Console.WriteLine("\n=================================================================================================");
-                Console.WriteLine("Currently running process list : ");
-                foreach (Tuple<OSProcess, DateTime> runningProcess in RunningProcesses)
+                Console.WriteLine("|                                 Currently Running Process List                                 |");
+                Console.WriteLine("==================================================================================================");
+
+                // Print the table header
+                Console.WriteLine(string.Format("| {0,-20} | {1,-15} | {2,-16} | {3,-10} | {4,-10} | {5,-8}|",
+            "Name", "Added On", "Time to Complete", "Priority", "Memory", "Processor"));
+                Console.WriteLine("--------------------------------------------------------------------------------------------------");
+
+                // Print each process as a row in the table
+                foreach (var runningProcess in RunningProcesses)
                 {
-                    Console.WriteLine($"{runningProcess.Item1.ToString()} added on {runningProcess.Item2.ToShortTimeString()}");
+                    Console.WriteLine(string.Format("| {0,-20} | {1,-15} | {2,-16} | {3,-10} | {4,-10} | {5,-9}|",
+                        runningProcess.Item1.name,
+                        runningProcess.Item2.ToShortTimeString(),
+                        runningProcess.Item1.timeToComplete,
+                        runningProcess.Item1.priority,
+                        runningProcess.Item1.memory,
+                        runningProcess.Item1.processor));
                 }
+
+                Console.WriteLine("==================================================================================================");
             }
-            Console.WriteLine("=================================================================================================");
-            Console.WriteLine($"OS State => Processor : {processorState} Memory : {memoryState}");
-            Console.WriteLine("=================================================================================================\n");
+
+            // Print OS state summary
+            Console.WriteLine(string.Format("| {0,-94} |", "OS State => Processor: " + processorState + "% , Memory: " + memoryState + "%"));
+            Console.WriteLine("==================================================================================================\n");
         }
+
+
 
     }
 }
