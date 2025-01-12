@@ -61,7 +61,8 @@ namespace Server
                 string receivedMessage;
 
                 // The communication may now ensue, this is just a test
-                try { 
+                try
+                {
                     acceptedBuffer = new byte[4096];
                     receivedBytes = acceptedSocket.Receive(acceptedBuffer);
                     receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
@@ -99,8 +100,6 @@ namespace Server
                                 Console.WriteLine("Process cannot be added due to resource constraints");
                                 acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints\n"));
                             }
-                            Console.WriteLine($"Current OS state Processor : {OS.processorState} Memory : {OS.memoryState}");
-
                         }
                         else
                         {
@@ -112,7 +111,7 @@ namespace Server
                         receivedBytes = 0;
                         acceptedBuffer = new byte[4096];
                         receivedMessage = "";
-                        
+
                     }
 
                     // theoretically implement exiting the code, if the client sends "ENDALL"
