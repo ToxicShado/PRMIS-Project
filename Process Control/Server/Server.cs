@@ -194,7 +194,8 @@ namespace Server
             try
             {
                 tcpSocketEP = tcpSocket.LocalEndPoint as IPEndPoint;
-                Console.WriteLine($"[INFO] TCP socket local endpoint: {tcpSocketEP.Address}:{tcpSocketEP.Port}");
+                string ip = (tcpSocketEP.Address.ToString() == "0.0.0.0") ? "127.0.0.1" : tcpSocketEP.Address.ToString();
+                Console.WriteLine($"[INFO] TCP socket local endpoint: {ip}:{tcpSocketEP.Port}");
             }
             catch (Exception e)
             {
