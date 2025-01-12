@@ -7,12 +7,9 @@ namespace Server
 {
     public class Server
     {
+        private static OS OS = OS.getInstance();
         public static void Main(string[] args)
         {
-            double procesorState = 0;
-            double memoryState = 0;
-            List<OSProcess> RunningProcesses = new List<OSProcess>();
-            List<OSProcess> WaitingProcesses = new List<OSProcess>();
 
             //This will be used to determine the scheduling algorithm, when we need it. Until then, it's commented out.
 
@@ -65,7 +62,7 @@ namespace Server
 
                 // The communication may now ensue, this is just a test
                 try { 
-                    acceptedBuffer = new byte[1024];
+                    acceptedBuffer = new byte[4096];
                     receivedBytes = acceptedSocket.Receive(acceptedBuffer);
                     receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
                     Console.WriteLine($"Received: {receivedMessage}");
@@ -78,8 +75,9 @@ namespace Server
                 }
 
 
-                while (receivedMessage != "END")
+                while (true)
                 {
+
                     receivedBytes = acceptedSocket.Receive(acceptedBuffer);
 
                     if (receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
@@ -89,24 +87,32 @@ namespace Server
 
                         if (receivedMessage != "END") // if the communication is stopped, we should just jump over it
                         {
-                            OSProcess process = OSProcess.toProcess(acceptedBuffer, receivedBytes);
+                            OSProcess process = OperationsOnOSProcess.toProcess(acceptedBuffer, receivedBytes);
                             Console.WriteLine(process.ToString());
-                            if (procesorState + process.processor <= 100 && memoryState + process.memory <= 100)
+                            if (OS.isTherePlaceForNewProcess(process))
                             {
-                                WaitingProcesses.Add(process);
-                                acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
+                                OS.AddNewProcess(process);
+                                acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully\n"));
                             }
                             else
                             {
                                 Console.WriteLine("Process cannot be added due to resource constraints");
-                                acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints"));
+                                acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints\n"));
                             }
+                            Console.WriteLine($"Current OS state Processor : {OS.processorState} Memory : {OS.memoryState}");
+
                         }
                         else
                         {
                             Console.WriteLine("Connection closed by Client request successfully");
                             acceptedSocket.Close();
+                            break;
                         }
+
+                        receivedBytes = 0;
+                        acceptedBuffer = new byte[4096];
+                        receivedMessage = "";
+                        
                     }
 
                     // theoretically implement exiting the code, if the client sends "ENDALL"
@@ -182,7 +188,7 @@ namespace Server
                 return null;
             }
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4096];
             EndPoint clientEP = new IPEndPoint(IPAddress.Any, 0);
             int received;
 
