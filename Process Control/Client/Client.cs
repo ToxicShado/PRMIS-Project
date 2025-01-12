@@ -44,7 +44,6 @@ namespace Client
             string receivedMessage = Encoding.UTF8.GetString(messageData);
             do
             {
-
                 System.Console.WriteLine(receivedMessage);
                 if (receivedMessage.StartsWith("OK"))
                 {
@@ -55,7 +54,7 @@ namespace Client
                 else if (receivedMessage.StartsWith("ERR_0"))
                 {
                     Console.WriteLine("Failed to send process");
-                    Task.Delay(random.Next(500, 2000)).Wait();
+                    Task.Delay(random.Next(100, 2000)).Wait();
                     tcpSocket.Send(processes[0].toCSV());
                     messageData = new byte[4096];
                     tcpSocket.Receive(messageData);
@@ -63,7 +62,7 @@ namespace Client
                     receivedMessage = "";
                     receivedMessage = Encoding.UTF8.GetString(messageData);
                 }
-                Task.Delay(1000).Wait();
+                Task.Delay(500).Wait();
             } while (processes.Count > 0);
             
             tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
