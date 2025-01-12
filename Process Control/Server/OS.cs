@@ -109,7 +109,7 @@ namespace Server
         public void PrintCurrentlyRunningProcesses()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Console.WriteLine("╔════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+            Console.WriteLine("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════╗");
             Console.WriteLine("║                                          THE TASK MANAGER                              _   \u25A1   ×   ║");
             Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
             Console.WriteLine("╟════════════════════════════════════════════════════════════════════════════════════════════════════╢");
@@ -117,8 +117,10 @@ namespace Server
             if (RunningProcesses.Count == 0)
             {
                 Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-                Console.WriteLine("║                  No processes are currently running. Use your system efficiently!                  ║");
+                Console.WriteLine("║                                 No processes are currently running                                 ║");
+                Console.WriteLine("║                          Tip: Add a process to make the system productive                          ║");
                 Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
+
             }
             else
             {
@@ -147,10 +149,10 @@ namespace Server
             Console.WriteLine("╟════════════════════════════════════════════════════════════════════════════════════════════════════╢");
             Console.WriteLine("║                                        The Current OS Usage                                        ║");
             Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-            string processor = $"║ Processor Usage: [{new string('#', (int)(processorState / ((double)100 / 74)))}{new string('-', 74 - (int)(processorState / ((double)100 / 74)))}] {processorState}%"
+            string processor = $"║ Processor Usage: [{new string('■', (int)(processorState / ((double)100 / 74)))}{new string('-', 74 - (int)(processorState / ((double)100 / 74)))}] {processorState}%"
                 + (processorState < 10 ? "   ║" : (processorState == 100) ? " ║" : "  ║");
             Console.WriteLine(processor);
-            string memory = $"║ Memory Usage   : [{new string('#', (int)(memoryState / ((double)100 / 74)))}{new string('-', 74 - (int)(memoryState / ((double)100 / 74)))}] {memoryState}%"
+            string memory = $"║ Memory Usage   : [{new string('■', (int)(memoryState / ((double)100 / 74)))}{new string('-', 74 - (int)(memoryState / ((double)100 / 74)))}] {memoryState}%"
                 + (memoryState < 10 ? "   ║" : (memoryState == 100) ? " ║" : "  ║");
             Console.WriteLine(memory);
             Console.WriteLine("╚════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
