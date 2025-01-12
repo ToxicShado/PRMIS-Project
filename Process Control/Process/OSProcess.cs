@@ -38,14 +38,14 @@ namespace Process
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error converting to CSV: {e.Message}");
+                Console.WriteLine($"[EXCPETION] Error converting to CSV: {e.Message}");
                 return null;
             }
         }
 
         public override string ToString()
         {
-            return $"Name: {name}, Time to complete: {timeToComplete}, Priority: {priority}, Memory: {memory}, Processor: {processor}";
+            return $"Name : {name}, Time To Complete: {timeToComplete}, Priority: {priority}, Memory Usage: {memory}, Processor Usage: {processor}";
         }
     }
 }
