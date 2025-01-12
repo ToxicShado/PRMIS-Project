@@ -193,7 +193,7 @@ namespace Server
             IPEndPoint tcpSocketEP;
             try
             {
-                tcpSocketEP = (IPEndPoint)tcpSocket.LocalEndPoint;
+                tcpSocketEP = tcpSocket.LocalEndPoint as IPEndPoint;
                 Console.WriteLine($"[INFO] TCP socket local endpoint: {tcpSocketEP.Address}:{tcpSocketEP.Port}");
             }
             catch (Exception e)
