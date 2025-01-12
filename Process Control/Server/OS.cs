@@ -109,12 +109,12 @@ namespace Server
         {
             if (RunningProcesses.Count == 0)
             {
-                Console.WriteLine("=================================================================================================");
+                Console.WriteLine("\n=================================================================================================");
                 Console.WriteLine("No processes are currently running.");
             }
             else
             {
-                Console.WriteLine("=================================================================================================");
+                Console.WriteLine("\n=================================================================================================");
                 Console.WriteLine("Currently running process list : ");
                 foreach (Tuple<OSProcess, DateTime> runningProcess in RunningProcesses)
                 {
@@ -123,7 +123,7 @@ namespace Server
             }
             Console.WriteLine("=================================================================================================");
             Console.WriteLine($"OS State => Processor : {processorState} Memory : {memoryState}");
-            Console.WriteLine("=================================================================================================");
+            Console.WriteLine("=================================================================================================\n");
         }
 
     }
