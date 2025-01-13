@@ -53,9 +53,9 @@ namespace Server
                     return;
                 }
 
-                byte[] acceptedBuffer;
-                int receivedBytes;
-                string receivedMessage;
+                //byte[] acceptedBuffer;
+                //int receivedBytes;
+                //string receivedMessage;
 
                 // The communication may now ensue, this is just a test
                 //try
@@ -91,6 +91,14 @@ namespace Server
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Press any key (on the keyboard) to exit.");
             Console.ResetColor();
+
+            //i am baffled by the stupidity of this
+            //but either it's my fault or the fault of the console
+            //that it doesn't flush the keys properly
+            while (Console.KeyAvailable)
+            {
+                Console.ReadKey(true);
+            }
             Console.ReadKey();
         }
 

@@ -33,13 +33,20 @@ namespace Client
 
             //OSProcess process = OperationsOnOSProcess.CreateProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
             // so i will just create a processes like this "for now".
-            List<OSProcess> processes = OSProcess.GenerateNProcesses(5, true);
+            List<OSProcess> processes = OperationsOnOSProcess.GenerateNProcesses(5, true);
 
             SendProcessesToServer(processes, tcpSocket);
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nPress any key (on the keyboard) to exit.");
             Console.ResetColor();
+
+            //WHY THE HELL IS THIS NECESSARY AND FLUSHING THE CONSOLE DOESNT WORK
+            while (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo k = Console.ReadKey(true);
+                //Console.WriteLine($"Key that has been flushed {k}");
+            }
             Console.ReadKey();
         }
 

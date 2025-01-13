@@ -1,5 +1,4 @@
 ﻿using Process;
-using System.Diagnostics;
 
 namespace Server
 {
@@ -19,13 +18,14 @@ namespace Server
             mutex = new Mutex();
 
             Thread backgroundThread = new Thread(() =>
-            {
-                while (true)
-                {
-                    RemoveProcessIfFinished();
-                    Thread.Sleep(50);
-                }
-            })
+                                      {
+                                          while (true)
+                                          {
+                                              RemoveProcessIfFinished();
+                                              Thread.Sleep(50);
+                                          }
+                                      }
+                                      )
             { IsBackground = true };
 
             backgroundThread.Start();
@@ -117,7 +117,7 @@ namespace Server
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                  Currently Running Process List                                    ║");
-            try 
+            try
             {
                 mutex.WaitOne();
                 if (RunningProcesses.Count == 0)
@@ -196,11 +196,6 @@ namespace Server
                 mutex.ReleaseMutex();
             }
         }
-
-        
-
-
-
     }
 }
 
