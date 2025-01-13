@@ -49,7 +49,7 @@ namespace Process
             }
         }
 
-        public static OSProcess createProcess()
+        public static OSProcess CreateProcess()
         {
             string name = "EMPTY";
             int timeToComplete = -1;
