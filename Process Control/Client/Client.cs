@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 
@@ -12,7 +13,9 @@ namespace Client
         public static void Main(string[] args)
         {
             Console.WriteLine("[STATUS] Initializing client-side connection...");
-            Socket tcpSocket = InitialiseClientsideConnection();
+            Random random = new Random();
+
+            Socket tcpSocket = InitialiseClientsideConnectionWithMultipleRetries();
 
             if (tcpSocket == null)
             {
@@ -28,16 +31,12 @@ namespace Client
             //Console.WriteLine("[INFO] Sent initial message to server.");
 
 
-
             //OSProcess process = OperationsOnOSProcess.CreateProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
-
             // so i will just create a processes like this "for now".
             List<OSProcess> processes = OSProcess.GenerateNProcesses(5, true);
 
             SendProcessesToServer(processes, tcpSocket);
 
-
-            
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nPress any key (on the keyboard) to exit.");
             Console.ResetColor();
@@ -98,7 +97,73 @@ namespace Client
             //tcpSocket.Close();
 
             return true;
-        }    
+        }
+
+
+        public static Socket InitialiseClientsideConnectionWithMultipleRetries()
+        {
+            Random random = new Random();
+            Socket tcpSocket = null;
+
+            int i = 0;
+
+            while (tcpSocket == null)
+            {
+                tcpSocket = InitialiseClientsideConnection();
+                if (tcpSocket == null)
+                {
+                    Console.WriteLine("[ERROR] Connection failed. Retrying...");
+                    if (i < 5)
+                    {
+                        Task.Delay(random.Next(100, 2000)).Wait();
+                    }
+                    else if (i < 8)
+                    {
+                        Task.Delay(random.Next(2000, 5000)).Wait();
+                    }
+                    else if (i < 15)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("At this point, a connection seems unlikely.. So, click Escape to exit the program");
+                        Console.ResetColor();
+
+                        while (Console.KeyAvailable)
+                        {
+                            ConsoleKeyInfo key = Console.ReadKey(true);
+                            if (key.Key == ConsoleKey.Escape)
+                            {
+                                Console.WriteLine("Escape pressed. Exiting...");
+                                return null;
+                            }
+                        }
+                        Task.Delay(random.Next(5000, 10000)).Wait();
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("At this point, a connection seems unlikely.. So, click Escape to exit the program");
+                        Console.ResetColor();
+                        while (Console.KeyAvailable)
+                        {
+                            ConsoleKeyInfo key = Console.ReadKey(true);
+                            if (key.Key == ConsoleKey.Escape)
+                            {
+                                Console.WriteLine("Escape pressed. Exiting...");
+                                return null;
+                            }
+                        }
+                        Task.Delay(random.Next(5000, 100000)).Wait();
+                    }
+                }
+                else
+                {
+                    return tcpSocket;
+                }
+                i++;
+            }
+
+            return null;
+        }
 
         public static Socket InitialiseClientsideConnection()
         {
