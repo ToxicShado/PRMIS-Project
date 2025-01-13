@@ -142,8 +142,8 @@ namespace Server
                     {
                         Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
                             runningProcess.Item1.name,
-                            runningProcess.Item2.ToLongTimeString(),
-                            runningProcess.Item1.timeToComplete.ToString() + "ms",
+                            runningProcess.Item2.ToString("HH:mm:ss.fff"),
+                            runningProcess.Item1.timeToComplete + "ms",
                             runningProcess.Item1.priority,
                             runningProcess.Item1.memory.ToString() + "%",
                             runningProcess.Item1.processor.ToString() + "%"));

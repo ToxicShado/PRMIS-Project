@@ -52,10 +52,6 @@ namespace Server
                     Console.WriteLine("[ERROR] Connection failed");
                     return;
                 }
-                else
-                {
-                    Console.WriteLine("[STATUS] Connection successful");
-                }
 
                 byte[] acceptedBuffer;
                 int receivedBytes;
@@ -103,6 +99,7 @@ namespace Server
                             {
                                 OS.AddNewProcess(process);
                                 acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
+                                Console.WriteLine($"[STATUS] Process {process} added successfully");
                             }
                             else
                             {
@@ -125,7 +122,7 @@ namespace Server
 
                     }
 
-                    // theoretically implement exiting the code, if the client sends "ENDALL"
+                    // theoretically implement exiting the code, if any client sends "ENDALL" or something like "STOP" or "EXIT"
                 }
             }
         }
@@ -157,7 +154,7 @@ namespace Server
             }
             catch (Exception e)
             {
-                Console.WriteLine("[ERROR] Failed to bind the UDP socket to the endpoint (0.0.0.0:25565).");
+                Console.WriteLine("[ERROR] Failed to bind the UDP socket to the endpoint (127.0.0.1:25565).");
                 Console.WriteLine($"[EXCEPTION] {e}");
                 return null;
             }
