@@ -1,4 +1,5 @@
 ﻿using Process;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Client
         public static void Main(string[] args)
         {
             Console.WriteLine("[STATUS] Initializing client-side connection...");
-            Socket tcpSocket = initialiseClientsideConnection();
+            Socket tcpSocket = InitialiseClientsideConnection();
 
             if (tcpSocket == null)
             {
@@ -20,42 +21,38 @@ namespace Client
             }
 
             // Test the connection by sending a message to the server
-            string message = "I Am Aliveeee";
-            byte[] messageData = new byte[4096];
-            messageData = Encoding.UTF8.GetBytes(message);
-            tcpSocket.Send(messageData);
-            Console.WriteLine("[INFO] Sent initial message to server.");
+            //string message = "I Am Aliveeee";
+            //byte[] messageData = new byte[4096];
+            //messageData = Encoding.UTF8.GetBytes(message);
+            //tcpSocket.Send(messageData);
+            //Console.WriteLine("[INFO] Sent initial message to server.");
 
-            List<OSProcess> processes = new List<OSProcess>();
 
+
+            //OSProcess process = OperationsOnOSProcess.CreateProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
+
+            // so i will just create a processes like this "for now".
+            List<OSProcess> processes = OSProcess.GenerateNProcesses(5, true);
+
+            SendProcessesToServer(processes, tcpSocket);
+
+
+            
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\nPress any key (on the keyboard) to exit.");
+            Console.ResetColor();
+            Console.ReadKey();
+        }
+
+
+        public static bool SendProcessesToServer(List<OSProcess> processes, Socket tcpSocket)
+        {
             Random random = new Random();
 
-            //OSProcess process = OperationsOnOSProcess.createProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
-
-            // so i will just create a processes like this for now.
-            OSProcess process = new OSProcess("Test", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process1 = new OSProcess("Test1", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process2 = new OSProcess("Test2", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process3 = new OSProcess("Test3", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-            OSProcess process4 = new OSProcess("Test4", random.Next(500, 5000), random.Next(0, 9), random.Next(1, 10), random.Next(1, 100));
-
-            processes.Add(process);
-            processes.Add(process1);
-            processes.Add(process2);
-            processes.Add(process3);
-            processes.Add(process4);
-
-            Console.WriteLine("[INFO] Sending the following processes:");
-            Console.WriteLine(Encoding.UTF8.GetChars(process.toCSV()));
-            Console.WriteLine(Encoding.UTF8.GetChars(process1.toCSV()));
-            Console.WriteLine(Encoding.UTF8.GetChars(process2.toCSV()));
-            Console.WriteLine(Encoding.UTF8.GetChars(process3.toCSV()));
-            Console.WriteLine(Encoding.UTF8.GetChars(process4.toCSV()));
-
-            tcpSocket.Send(processes[0].toCSV());
+            tcpSocket.Send(processes[0].ConvertProcessTotoBytecodeCSV());
             Console.WriteLine($"[STATUS] Sent first process {processes[0]} to server.");
 
-            messageData = new byte[4096];
+            byte [] messageData = new byte[4096];
             tcpSocket.Receive(messageData);
             string receivedMessage = Encoding.UTF8.GetString(messageData);
             do
@@ -72,7 +69,7 @@ namespace Client
                 {
                     Console.WriteLine($"[ERROR] Failed to send process {processes[0]}");
                     Task.Delay(random.Next(100, 2000)).Wait();
-                    tcpSocket.Send(processes[0].toCSV());
+                    tcpSocket.Send(processes[0].ConvertProcessTotoBytecodeCSV());
                     Console.WriteLine($"[STATUS] Retrying to send process {processes[0]}.");
 
                     messageData = new byte[4096];
@@ -81,9 +78,9 @@ namespace Client
                     receivedMessage = "";
                     receivedMessage = Encoding.UTF8.GetString(messageData);
                 }
-                else if(receivedMessage.StartsWith("NEXT"))
+                else if (receivedMessage.StartsWith("NEXT"))
                 {
-                    tcpSocket.Send(processes[0].toCSV());
+                    tcpSocket.Send(processes[0].ConvertProcessTotoBytecodeCSV());
                     Console.WriteLine($"[STATUS] Sending next process {processes[0]}.");
 
                     messageData = new byte[4096];
@@ -96,17 +93,14 @@ namespace Client
                 Task.Delay(500).Wait();
             } while (processes.Count > 0);
 
-            tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
-            Console.WriteLine("[STATUS] All processes sent. Closing connection.");
+            tcpSocket.Send(Encoding.UTF8.GetBytes("EXIT"));
+            Console.WriteLine("[STATUS] All processes sent. Connection should be closed by Server.");
             //tcpSocket.Close();
-            
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\nPress any key (on the keyboard) to exit.");
-            Console.ReadKey();
-            Console.ResetColor();
-        }
 
-        public static Socket initialiseClientsideConnection()
+            return true;
+        }    
+
+        public static Socket InitialiseClientsideConnection()
         {
             // Create a UDP socket for initiating a connection
             Socket udpSocket;

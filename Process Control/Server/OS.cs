@@ -22,7 +22,7 @@ namespace Server
             {
                 while (true)
                 {
-                    removeProcessIfFinished();
+                    RemoveProcessIfFinished();
                     Thread.Sleep(50);
                 }
             })
@@ -41,7 +41,7 @@ namespace Server
             return instance;
         }
 
-        public bool isTherePlaceForNewProcess(OSProcess process)
+        public bool IsTherePlaceForNewProcess(OSProcess process)
         {
             bool result = false;
             try
@@ -78,7 +78,7 @@ namespace Server
 
         }
 
-        public void removeProcessIfFinished()
+        public void RemoveProcessIfFinished()
         {
             try
             {
@@ -110,11 +110,10 @@ namespace Server
         public void PrintCurrentlyRunningProcesses()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Console.ForegroundColor = ConsoleColor.DarkGray; // Cyan for header
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════╗");
             Console.WriteLine("║                                          THE TASK MANAGER                              _   □   ×   ║");
             Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-            Console.ResetColor(); // Reset color to default
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
             Console.WriteLine("║                                  Currently Running Process List                                    ║");
@@ -142,15 +141,14 @@ namespace Server
                     {
                         Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
                             runningProcess.Item1.name,
-                            runningProcess.Item2.ToLongTimeString(),
-                            runningProcess.Item1.timeToComplete.ToString() + "ms",
+                            runningProcess.Item2.ToString("HH:mm:ss.fff"),
+                            runningProcess.Item1.timeToComplete + "ms",
                             runningProcess.Item1.priority,
                             runningProcess.Item1.memory.ToString() + "%",
                             runningProcess.Item1.processor.ToString() + "%"));
                     }
 
                     Console.WriteLine("╠══════════════════════╧═════════════════╧══════════════════╧════════════╧════════════╧══════════════╣");
-                    Console.ResetColor();
                 }
 
                 // Print OS state summary

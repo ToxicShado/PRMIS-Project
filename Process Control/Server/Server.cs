@@ -45,16 +45,12 @@ namespace Server
 
             while (true)
             {
-                Socket acceptedSocket = initialiseServersideCommunication();
+                Socket acceptedSocket = InitialiseServersideCommunication();
 
                 if (acceptedSocket == null)
                 {
                     Console.WriteLine("[ERROR] Connection failed");
                     return;
-                }
-                else
-                {
-                    Console.WriteLine("[STATUS] Connection successful");
                 }
 
                 byte[] acceptedBuffer;
@@ -62,76 +58,101 @@ namespace Server
                 string receivedMessage;
 
                 // The communication may now ensue, this is just a test
-                try
-                {
-                    acceptedBuffer = new byte[4096];
-                    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
-                    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
-                    Console.WriteLine($"[INFO] Received: {receivedMessage}");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("[ERROR] Failed to receive the initial message from the client.");
-                    Console.WriteLine($"[EXCEPTION] {e}");
-                    return;
-                }
+                //try
+                //{
+                //    acceptedBuffer = new byte[4096];
+                //    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+                //    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                //    Console.WriteLine($"[INFO] Received: {receivedMessage}");
+                //}
+                //catch (Exception e)
+                //{
+                //    Console.WriteLine("[ERROR] Failed to receive the initial message from the client.");
+                //    Console.WriteLine($"[EXCEPTION] {e}");
+                //    return;
+                //}
 
+                int retVal = -2;
 
                 while (true)
                 {
-                    try 
-                    { 
-                        receivedBytes = acceptedSocket.Receive(acceptedBuffer);
-                    }
-                    catch (Exception e)
+                    retVal = ReceiveProcesses(acceptedSocket);
+                    if (retVal == -1 || retVal == 2 || retVal == 1)
                     {
-                        Console.WriteLine("[ERROR] Failed to receive the message from the client."); // connection likely closed?
-                        Console.WriteLine($"[EXCEPTION] {e}");
-                        receivedBytes = 0;
                         break;
                     }
+                }
 
-                    if (receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
-                    {
-                        receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
-
-                        if (receivedMessage != "END") // if the communication is stopped, we should just jump over it
-                        {
-                            OSProcess process = OperationsOnOSProcess.toProcess(acceptedBuffer, receivedBytes);
-                            Console.WriteLine($"\n[INFO] Received process details: {process}");
-                            if (OS.isTherePlaceForNewProcess(process))
-                            {
-                                OS.AddNewProcess(process);
-                                acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
-                            }
-                            else
-                            {
-                                Console.WriteLine("[INFO] Process cannot be added due to resource constraints");
-                                acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints"));
-                            }
-                            Console.WriteLine();
-                        }
-                        else
-                        {
-                            Console.WriteLine($"[INFO] Received: {receivedMessage}");
-                            Console.WriteLine("[STATUS] Connection closed by Client request successfully");
-                            acceptedSocket.Close();
-                            break;
-                        }
-
-                        receivedBytes = 0;
-                        acceptedBuffer = new byte[4096];
-                        receivedMessage = "";
-
-                    }
-
-                    // theoretically implement exiting the code, if the client sends "ENDALL"
+                if (retVal == 2)
+                {
+                    break;
                 }
             }
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Press any key (on the keyboard) to exit.");
+            Console.ResetColor();
+            Console.ReadKey();
+        }
+
+        public static int ReceiveProcesses(Socket acceptedSocket)
+        {
+            byte[] acceptedBuffer = new byte[4096];
+            int receivedBytes;
+            string receivedMessage;
+            try
+            {
+                receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[ERROR] Failed to receive the message from the client."); // connection likely closed?
+                Console.WriteLine($"[EXCEPTION] {e}");
+                receivedBytes = 0;
+                return -1;
+            }
+
+            if (receivedBytes > 0) // if there are no bytes to receive, then we cannot make a process
+            {
+                receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                if (receivedMessage == "END")
+                {
+                    Console.WriteLine($"[INFO] Received: {receivedMessage}");
+                    Console.WriteLine("[STATUS] Connection closed by Client request successfully");
+                    acceptedSocket.Close();
+                    return 1;
+                }
+                else if (receivedMessage == "EXIT")
+                {
+                    Console.WriteLine($"[INFO] Received: {receivedMessage}");
+                    Console.WriteLine("[STATUS] Connection closed by Client request successfully and the program should exit after you press any button.");
+                    acceptedSocket.Close();
+                    return 2;
+                }
+                else
+                {
+                    OSProcess process = OperationsOnOSProcess.toProcess(acceptedBuffer, receivedBytes);
+                    Console.WriteLine($"\n[INFO] Received process details: {process}");
+                    if (OS.IsTherePlaceForNewProcess(process))
+                    {
+                        OS.AddNewProcess(process);
+                        acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
+                        Console.WriteLine($"[STATUS] Process {process} added successfully");
+                    }
+                    else
+                    {
+                        Console.WriteLine("[INFO] Process cannot be added due to resource constraints");
+                        acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints"));
+                    }
+                    Console.WriteLine();
+                }
+                   
+                
+            }
+            return 0;
         }
 
 
-        public static Socket initialiseServersideCommunication()
+        public static Socket InitialiseServersideCommunication()
         {
             Socket initialConnection;
             IPEndPoint serverEP;
@@ -157,7 +178,7 @@ namespace Server
             }
             catch (Exception e)
             {
-                Console.WriteLine("[ERROR] Failed to bind the UDP socket to the endpoint (0.0.0.0:25565).");
+                Console.WriteLine("[ERROR] Failed to bind the UDP socket to the endpoint (127.0.0.1:25565).");
                 Console.WriteLine($"[EXCEPTION] {e}");
                 return null;
             }
