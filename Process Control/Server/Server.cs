@@ -58,19 +58,19 @@ namespace Server
                 string receivedMessage;
 
                 // The communication may now ensue, this is just a test
-                try
-                {
-                    acceptedBuffer = new byte[4096];
-                    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
-                    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
-                    Console.WriteLine($"[INFO] Received: {receivedMessage}");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("[ERROR] Failed to receive the initial message from the client.");
-                    Console.WriteLine($"[EXCEPTION] {e}");
-                    return;
-                }
+                //try
+                //{
+                //    acceptedBuffer = new byte[4096];
+                //    receivedBytes = acceptedSocket.Receive(acceptedBuffer);
+                //    receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
+                //    Console.WriteLine($"[INFO] Received: {receivedMessage}");
+                //}
+                //catch (Exception e)
+                //{
+                //    Console.WriteLine("[ERROR] Failed to receive the initial message from the client.");
+                //    Console.WriteLine($"[EXCEPTION] {e}");
+                //    return;
+                //}
 
                 int retVal = -2;
 

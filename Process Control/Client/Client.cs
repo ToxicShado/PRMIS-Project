@@ -21,11 +21,11 @@ namespace Client
             }
 
             // Test the connection by sending a message to the server
-            string message = "I Am Aliveeee";
-            byte[] messageData = new byte[4096];
-            messageData = Encoding.UTF8.GetBytes(message);
-            tcpSocket.Send(messageData);
-            Console.WriteLine("[INFO] Sent initial message to server.");
+            //string message = "I Am Aliveeee";
+            //byte[] messageData = new byte[4096];
+            //messageData = Encoding.UTF8.GetBytes(message);
+            //tcpSocket.Send(messageData);
+            //Console.WriteLine("[INFO] Sent initial message to server.");
 
 
 
