@@ -14,4 +14,7 @@
 /Process Control/Process/obj
 /Process Control/Process/bin/Debug/net9.0
 
+/Process Control/Task Manager/obj
+/Process Control/Task Manager/bin/Debug/net9.0
+
 *.pdf

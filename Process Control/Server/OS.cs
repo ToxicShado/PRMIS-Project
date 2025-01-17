@@ -1,4 +1,7 @@
 ﻿using Process;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Server
 {
@@ -10,12 +13,20 @@ namespace Server
         private static OS instance = null;
         private readonly Mutex mutex;
 
+        private static Socket TaskManagerSocket = null;
+        private static IPEndPoint TaskManagerEP = null;
         private OS()
         {
             processorState = 0;
             memoryState = 0;
             RunningProcesses = new List<Tuple<OSProcess, DateTime>>();
             mutex = new Mutex();
+
+            if (TaskManagerSocket == null)
+            {
+                Console.WriteLine("[ERROR] Connection failed");
+                return; //what does this return exactly? the whole server?
+            }
 
             Thread backgroundThread = new Thread(() =>
                                       {
@@ -39,6 +50,45 @@ namespace Server
                 instance = new OS();
             }
             return instance;
+        }
+
+        public static bool OpenTaskManagerAndConnectToIt()
+        {
+            string currentPath = Directory.GetCurrentDirectory();
+
+            // Navigate up three levels to the root directory (Process Control)
+            string projectRoot = Directory.GetParent(currentPath).Parent.Parent.Parent.FullName;
+
+            // Assemble the path to Task Manager.exe
+            string taskManagerPath = Path.Combine(projectRoot, "Task Manager", "bin", "Debug", "net9.0", "Task Manager.exe");
+
+            ProcessStartInfo psi = new ProcessStartInfo
+            {
+                FileName = taskManagerPath,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Normal  // Can be Minimized, Maximized, Hidden
+            };
+
+            System.Diagnostics.Process taskManagerProcess = System.Diagnostics.Process.Start(psi);
+
+            Thread.Sleep(1000); // Wait for the Task Manager to start
+
+            TaskManagerEP = new IPEndPoint(IPAddress.Loopback, 25566);
+            TaskManagerSocket = InitialiseConnectionWithTaskManager();
+
+            if (TaskManagerSocket == null)
+            {
+                Console.WriteLine("[ERROR] Connection failed");
+                return false;
+            }
+
+            //taskManagerProcess.WaitForExitAsync();
+            //Console.WriteLine("[Server] Task Manager.exe has exited. Closing Server...");
+
+            //// Step 6: Exit the Server process
+            //Environment.Exit(0);
+
+            return true;
         }
 
         public bool IsTherePlaceForNewProcess(OSProcess process)
@@ -109,93 +159,63 @@ namespace Server
 
         public void PrintCurrentlyRunningProcesses()
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════╗");
-            Console.WriteLine("║                                          THE TASK MANAGER                              _   □   ×   ║");
-            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-            Console.WriteLine("║                                  Currently Running Process List                                    ║");
+            byte[] messageData = ConvertOSToCSVAndThenToBytecode();
+            TaskManagerSocket.SendTo(messageData, TaskManagerEP);
+        }
+
+        private byte[] ConvertOSToCSVAndThenToBytecode()
+        {
+            string csv = "";
+            csv += $"{processorState},{memoryState},";
+            if (RunningProcesses.Any())
+            {
+                foreach (Tuple<OSProcess, DateTime> process in RunningProcesses)
+                {
+                    csv += $"{process.Item1.name},{process.Item1.timeToComplete},{process.Item1.priority},{process.Item1.memory},{process.Item1.processor},{process.Item2},";
+                }
+                csv = csv.TrimEnd(',');
+            }
+            csv += "\n";
+            return System.Text.Encoding.UTF8.GetBytes(csv);
+        }
+
+
+        private static Socket InitialiseConnectionWithTaskManager()
+        {
+            // Create a UDP socket for initiating a connection
+            Socket udpSocket;
+            IPEndPoint serverEP;
             try
             {
-                mutex.WaitOne();
-                if (RunningProcesses.Count == 0)
-                {
-                    Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-                    Console.WriteLine("║                                 No processes are currently running                                 ║");
-                    Console.WriteLine("║                        ProTip: Add a process to make the system productive!                        ║");
-                    Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-
-                }
-                else
-                {
-                    Console.WriteLine("╠══════════════════════╤═════════════════╤══════════════════╤════════════╤════════════╤══════════════╣");
-                    // Print the table header
-                    Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
-                        "Name", "Added On", "Time to Complete", "Priority", "Memory", "Processor"));
-                    Console.WriteLine("╟──────────────────────┼─────────────────┼──────────────────┼────────────┼────────────┼──────────────╢");
-
-                    // Print each process as a row in the table
-                    foreach (var runningProcess in RunningProcesses)
-                    {
-                        Console.WriteLine(string.Format("║ {0,-20} │ {1,-15} │ {2,-16} │ {3,-10} │ {4,-10} │ {5,-12} ║",
-                            runningProcess.Item1.name,
-                            runningProcess.Item2.ToString("HH:mm:ss.fff"),
-                            runningProcess.Item1.timeToComplete + "ms",
-                            runningProcess.Item1.priority,
-                            runningProcess.Item1.memory.ToString() + "%",
-                            runningProcess.Item1.processor.ToString() + "%"));
-                    }
-
-                    Console.WriteLine("╠══════════════════════╧═════════════════╧══════════════════╧════════════╧════════════╧══════════════╣");
-                }
-
-                // Print OS state summary
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-                Console.WriteLine("║                                        The Current OS Usage                                        ║");
-                Console.WriteLine("╠════════════════════════════════════════════════════════════════════════════════════════════════════╣");
-
-                Console.Write("║ ");
-                if (processorState <= 50)
-                    Console.ForegroundColor = ConsoleColor.Green; // Low usage
-                else if (processorState <= 75)
-                    Console.ForegroundColor = ConsoleColor.DarkYellow; // Medium usage
-                else
-                    Console.ForegroundColor = ConsoleColor.Red; // High usage
-                string processor = $"Processor Usage: [{new string('■', (int)(processorState / ((double)100 / 74)))}{new string('-', 74 - (int)(processorState / ((double)100 / 74)))}] {processorState}%";
-                Console.Write(processor);
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine(processorState < 10 ? "   ║" : (processorState == 100) ? " ║" : "  ║");
-
-                Console.Write("║ ");
-                if (memoryState <= 50)
-                    Console.ForegroundColor = ConsoleColor.Green; // Low usage
-                else if (memoryState <= 75)
-                    Console.ForegroundColor = ConsoleColor.DarkYellow; // Medium usage
-                else
-                    Console.ForegroundColor = ConsoleColor.Red; // High usage
-
-                string memory = $"Memory Usage   : [{new string('■', (int)(memoryState / ((double)100 / 74)))}{new string('-', 74 - (int)(memoryState / ((double)100 / 74)))}] {memoryState}%";
-                Console.Write(memory);
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine(memoryState < 10 ? "   ║" : (memoryState == 100) ? " ║" : "  ║");
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine("╚════════════════════════════════════════════════════════════════════════════════════════════════════╝\n");
-                Console.ResetColor();
+                udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                serverEP = new IPEndPoint(IPAddress.Loopback, 25566);
+                Console.WriteLine("[STATUS] UDP socket created.");
             }
             catch (Exception e)
             {
-                Console.ResetColor();
-                Console.WriteLine($"[EXCEPTION] Error printing currently running processes: {e.Message}");
+                Console.WriteLine("[ERROR] Unable to open a UDP socket on IPAddress: 127.0.0.1 and Port: 25566.");
+                Console.WriteLine($"[EXCEPTION] {e}");
+                return null;
             }
-            finally
+
+            // Send a registration message to the server
+            try
             {
-                Console.ResetColor();
-                mutex.ReleaseMutex();
+                string registrationMessage = "Could You Please Connect?";
+                byte[] registrationData = System.Text.Encoding.UTF8.GetBytes(registrationMessage);
+                udpSocket.SendTo(registrationData, serverEP);
+                Console.WriteLine("[STATUS] Sent registration message to server.");
             }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[ERROR] Unable to send registration message to server at {serverEP.Address}:{serverEP.Port}.");
+                Console.WriteLine($"[EXCEPTION] {e}");
+                return null;
+            }
+            return udpSocket;
         }
+
+
     }
 }
 

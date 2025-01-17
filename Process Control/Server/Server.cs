@@ -1,14 +1,26 @@
 ﻿using Process;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
 
 namespace Server
 {
     public class Server
     {
+        public double processorState { get; private set; }
+        public double memoryState { get; private set; }
+        public List<Tuple<OSProcess, DateTime>> RunningProcesses { get; private set; }
         public static void Main(string[] args)
         {
+            // Open an instance of Task Manager, and connect to it.
+
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.WriteLine("[STATUS] Opening Task Manager...");
+            if (OS.OpenTaskManagerAndConnectToIt() == false)
+            {
+                Console.WriteLine("[ERROR] Failed to open Task Manager.");
+                return;
+            }
+            Console.ResetColor();
+
             Console.WriteLine("[STATUS] Starting server...");
 
             //This will be used to determine the scheduling algorithm, when we need it. Until then, it's commented out.

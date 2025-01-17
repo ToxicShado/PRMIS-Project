@@ -3,14 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
+    <RootNamespace>Task_Manager</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Client\Client.csproj" />
     <ProjectReference Include="..\Process\Process.csproj" />
-    <ProjectReference Include="..\Task Manager\Task Manager.csproj" />
   </ItemGroup>
 
 </Project>
