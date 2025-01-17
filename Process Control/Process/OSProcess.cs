@@ -6,7 +6,7 @@ namespace Process
     public class OSProcess
     {
         public string name { get; private set; } = "";
-        public int timeToComplete { get; private set; } = 0;
+        public int timeToComplete { get; set; } = 0;
         public int priority { get; private set; } = 0;
         public double memory { get; private set; } = 0;
         public double processor { get; private set; } = 0;

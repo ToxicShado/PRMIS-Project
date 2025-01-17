@@ -23,37 +23,6 @@ namespace Server
 
             Console.WriteLine("[STATUS] Starting server...");
 
-            //This will be used to determine the scheduling algorithm, when we need it. Until then, it's commented out.
-
-            //Console.WriteLine("Pick whether you wish to use Round Robin (1) or to sort by priority (2)");
-            //int choice = -1;
-
-            //// Keep asking for input until it's valid and either 1 or 2.
-            //while (true)
-            //{
-            //    string input = Console.ReadLine();
-            //    if (int.TryParse(input, out choice) && (choice == 1 || choice == 2))
-            //    {
-            //        break;
-            //    }
-            //    Console.WriteLine("Invalid input, please try again");
-            //}
-
-            //Console.WriteLine($"Choice {choice}");
-
-            //switch (choice)
-            //{
-            //    case 1:
-            //        Console.WriteLine("Round Robin");
-            //        break;
-            //    case 2:
-            //        Console.WriteLine("Priority");
-            //        break;
-            //    default:
-            //        Console.WriteLine("Invalid choice");
-            //        break;
-            //}
-
             while (true)
             {
                 Socket acceptedSocket = ServerFunctions.InitialiseServersideCommunication();
