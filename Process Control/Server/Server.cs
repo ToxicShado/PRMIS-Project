@@ -1,4 +1,4 @@
-﻿using Process;
+﻿using OSProcesses;
 using System.Net.Sockets;
 
 namespace Server
@@ -11,6 +11,8 @@ namespace Server
         public static void Main(string[] args)
         {
             // Open an instance of Task Manager, and connect to it.
+
+            Console.Title = "Server";
 
             Console.WriteLine("[STATUS] Opening Task Manager...");
             if (OS.OpenTaskManagerAndConnectToIt() == false)

@@ -1,7 +1,8 @@
-﻿using Process;
+﻿using OSProcesses;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Server
 {
@@ -108,6 +109,9 @@ namespace Server
                 Console.WriteLine("[ERROR] Connection failed");
                 return false;
             }
+
+            int PID = System.Diagnostics.Process.GetCurrentProcess().Id;
+            TaskManagerSocket.SendTo(Encoding.UTF8.GetBytes(PID.ToString()), TaskManagerEP);
 
             //taskManagerProcess.WaitForExitAsync();
             //Console.WriteLine("[Server] Task Manager.exe has exited. Closing Server...");

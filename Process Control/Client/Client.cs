@@ -1,4 +1,4 @@
-﻿using Process;
+﻿using OSProcesses;
 using System.Net.Sockets;
 
 
@@ -8,6 +8,7 @@ namespace Client
     {
         public static void Main(string[] args)
         {
+            Console.Title = "Client";
             Console.WriteLine("[STATUS] Initializing client-side connection...");
             Random random = new Random();
 

@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\Client.csproj" />
-    <ProjectReference Include="..\Process\Process.csproj" />
+    <ProjectReference Include="..\Process\OSProcesses.csproj" />
     <ProjectReference Include="..\Task Manager\Task Manager.csproj" />
   </ItemGroup>
 

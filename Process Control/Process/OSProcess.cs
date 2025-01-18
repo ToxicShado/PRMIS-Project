@@ -1,7 +1,7 @@
 ﻿using System.Text;
 
 
-namespace Process
+namespace OSProcesses
 {
     public class OSProcess
     {

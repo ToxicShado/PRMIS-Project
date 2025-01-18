@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csp
 		{094947D1-B012-4E69-9070-A37025EE8B20} = {094947D1-B012-4E69-9070-A37025EE8B20}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Process", "Process\Process.csproj", "{094947D1-B012-4E69-9070-A37025EE8B20}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OSProcesses", "Process\OSProcesses.csproj", "{094947D1-B012-4E69-9070-A37025EE8B20}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Task Manager", "Task Manager\Task Manager.csproj", "{A51ACED7-8D3D-40BC-8087-9AB874603DCD}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Process\Process.csproj" />
+    <ProjectReference Include="..\Process\OSProcesses.csproj" />
   </ItemGroup>
 
 </Project>

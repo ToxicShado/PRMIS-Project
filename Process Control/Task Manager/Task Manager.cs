@@ -1,48 +1,101 @@
-﻿using Process;
+﻿using OSProcesses;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+
 
 namespace Task_Manager
 {
     public class TaskManager
     {
+        static int PID = -1;
+        static bool clear = false;
         static void Main(string[] args)
         {
+            Console.Title = "Task Manager";
+
             Socket socket = InitialiseServersideCommunication();
-            bool clear = SeeAllResultsOrRefreshConsole();
+            if (socket == null)
+            {
+                Console.WriteLine("[ERROR] Failed to initialise the server-side communication.");
+                return;
+            }
+
+            AutomaticallyCloseTaskManager(socket);
+
+
+            Thread thread2 = new Thread(() => SeeAllResultsOrRefreshConsole()) { IsBackground = true };
+            thread2.Start();
+
+
             while (true)
             {
                 byte[] message = new byte[4096];
                 socket.Receive(message);
                 string receivedMessage = Encoding.UTF8.GetString(message);
-                //Console.WriteLine(receivedMessage);
 
-                double processorState; double memoryState; List<Tuple<OSProcess, DateTime>> RunningProcesses;
                 PrintCurrentlyRunningProcesses(ConvertBytecodeToCSVandThenToString(message), clear);
             }
         }
 
+        // This is just unnecessary, but it's fun
+        //static void TypeText(string text, int delay = 10)
+        //{
+        //    foreach (char c in text)
+        //    {
+        //        Console.Write(c);
+        //        System.Threading.Thread.Sleep(delay);
+        //    }
+        //    Console.WriteLine();
+        //}
+
+        public static void AutomaticallyCloseTaskManager(Socket socket)
+        {
+            byte[] rawPID = new byte[4096];
+            socket.Receive(rawPID);
+            int.TryParse(Encoding.UTF8.GetString(rawPID), out PID);
+            Thread thread = new Thread(() => CloseTaskManager()) { IsBackground = true };
+            thread.Start();
+        }
+
+        public static void CloseTaskManager()
+        {
+            Thread.Sleep(1000);
+            while (true)
+            {
+                try
+                {
+                    System.Diagnostics.Process process = System.Diagnostics.Process.GetProcessById(PID);
+                }
+                catch (Exception e)
+                {
+                    Environment.Exit(0);
+                    return;
+                }
+                Thread.Sleep(100);
+            }
+        }
+
+        // this function should run in background so that it does not impact the Task Manager output
         public static bool SeeAllResultsOrRefreshConsole()
         {
             Console.WriteLine("Press any key within 5 seconds to see all results, without the console clearing.");
             Console.WriteLine("If you press nothing, the console will automatically refresh.");
             Console.CursorVisible = false;
-            Task<string> task = Task.Run(() => Console.ReadKey(true).ToString());
 
-            if (task.Wait(5000))  // Wait for user input with timeout
+            Task<ConsoleKeyInfo> task = Task.Run(() => Console.ReadKey(true));
+
+            if (task.Wait(5000))  // Waits up to 5 seconds
             {
-                if (task.Result != "")
-                {
-                    Console.WriteLine("We are now in the mode where the console will not clear.");
-                    return false; // Return exit command if user types "exit"
-                }
+                Console.WriteLine("We are now in the mode where the console will not clear.");
+                return false;
             }
 
             Console.Clear();
             Console.WriteLine("The console will now refresh every time the data is received.");
-            return true; // Return null if timeout expires
+            return true;
         }
+
 
         public static void PrintCurrentlyRunningProcesses(Tuple<double, double, List<Tuple<OSProcess, DateTime>>> data, bool clear)
         {
