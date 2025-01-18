@@ -10,7 +10,7 @@ namespace Task_Manager
         static void Main(string[] args)
         {
             Socket socket = InitialiseServersideCommunication();
-
+            bool clear = SeeAllResultsOrRefreshConsole();
             while (true)
             {
                 byte[] message = new byte[4096];
@@ -19,15 +19,35 @@ namespace Task_Manager
                 //Console.WriteLine(receivedMessage);
 
                 double processorState; double memoryState; List<Tuple<OSProcess, DateTime>> RunningProcesses;
-                PrintCurrentlyRunningProcesses(ConvertBytecodeToCSVandThenToString(message));
+                PrintCurrentlyRunningProcesses(ConvertBytecodeToCSVandThenToString(message), clear);
             }
         }
 
-
-        public static void PrintCurrentlyRunningProcesses(Tuple<double, double, List<Tuple<OSProcess, DateTime>>> data)
+        public static bool SeeAllResultsOrRefreshConsole()
         {
+            Console.WriteLine("Press any key within 5 seconds to see all results, without the console clearing.");
+            Console.WriteLine("If you press nothing, the console will automatically refresh.");
+            Console.CursorVisible = false;
+            Task<string> task = Task.Run(() => Console.ReadKey(true).ToString());
+
+            if (task.Wait(5000))  // Wait for user input with timeout
+            {
+                if (task.Result != "")
+                {
+                    Console.WriteLine("We are now in the mode where the console will not clear.");
+                    return false; // Return exit command if user types "exit"
+                }
+            }
 
             Console.Clear();
+            Console.WriteLine("The console will now refresh every time the data is received.");
+            return true; // Return null if timeout expires
+        }
+
+        public static void PrintCurrentlyRunningProcesses(Tuple<double, double, List<Tuple<OSProcess, DateTime>>> data, bool clear)
+        {
+            if (clear)
+                Console.Clear();
 
             double processorState = data.Item1;
             double memoryState = data.Item2;

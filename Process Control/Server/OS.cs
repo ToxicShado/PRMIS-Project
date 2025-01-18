@@ -225,20 +225,20 @@ namespace Server
                 return null;
             }
 
-            // Send a registration message to the server
-            try
-            {
-                string registrationMessage = "Could You Please Connect?";
-                byte[] registrationData = System.Text.Encoding.UTF8.GetBytes(registrationMessage);
-                udpSocket.SendTo(registrationData, serverEP);
-                Console.WriteLine("[STATUS] Sent registration message to server.");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"[ERROR] Unable to send registration message to server at {serverEP.Address}:{serverEP.Port}.");
-                Console.WriteLine($"[EXCEPTION] {e}");
-                return null;
-            }
+            //// Send a registration message to the server
+            //try
+            //{
+            //    string registrationMessage = "Could You Please Connect?";
+            //    byte[] registrationData = System.Text.Encoding.UTF8.GetBytes(registrationMessage);
+            //    udpSocket.SendTo(registrationData, serverEP);
+            //    Console.WriteLine("[STATUS] Sent registration message to server.");
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine($"[ERROR] Unable to send registration message to server at {serverEP.Address}:{serverEP.Port}.");
+            //    Console.WriteLine($"[EXCEPTION] {e}");
+            //    return null;
+            //}
             return udpSocket;
         }
 
@@ -267,7 +267,7 @@ namespace Server
 
                         // Clear the entire line before printing new output
                         Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r");
-                        Console.Write($"{loadingSymbols[animationIndex]} Process name: {process.name} Remaining Time: {Math.Max(process.timeToComplete,0) }");
+                        Console.Write($"{loadingSymbols[animationIndex]} Process name: {process.name} Remaining Time: {Math.Max(process.timeToComplete, 0)}");
                         animationIndex = (animationIndex + 1) % loadingSymbols.Length; // Rotate symbols
 
                         Thread.Sleep(cpuQuant); // For smoother transitions 

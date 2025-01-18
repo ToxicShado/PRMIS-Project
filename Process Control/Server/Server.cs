@@ -12,14 +12,13 @@ namespace Server
         {
             // Open an instance of Task Manager, and connect to it.
 
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.WriteLine("[STATUS] Opening Task Manager...");
             if (OS.OpenTaskManagerAndConnectToIt() == false)
             {
                 Console.WriteLine("[ERROR] Failed to open Task Manager.");
                 return;
             }
-            Console.ResetColor();
+            Console.WriteLine("\n\n");
 
             Console.WriteLine("[STATUS] Starting server...");
 
