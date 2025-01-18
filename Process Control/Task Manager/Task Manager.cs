@@ -34,7 +34,7 @@ namespace Task_Manager
                 socket.Receive(message);
                 string receivedMessage = Encoding.UTF8.GetString(message);
 
-                PrintCurrentlyRunningProcesses(ConvertBytecodeToCSVandThenToString(message), clear);
+                PrintCurrentlyRunningProcesses(ConvertBytecodeToCSVandThenToString(message));
             }
         }
 
@@ -80,7 +80,7 @@ namespace Task_Manager
         public static bool SeeAllResultsOrRefreshConsole()
         {
             Console.WriteLine("Press any key within 5 seconds to see all results, without the console clearing.");
-            Console.WriteLine("If you press nothing, the console will automatically refresh.");
+            Console.WriteLine("If you press nothing, the console will automatically refresh when there is new data.");
             Console.CursorVisible = false;
 
             Task<ConsoleKeyInfo> task = Task.Run(() => Console.ReadKey(true));
@@ -91,13 +91,12 @@ namespace Task_Manager
                 return false;
             }
 
-            Console.Clear();
             Console.WriteLine("The console will now refresh every time the data is received.");
             return true;
         }
 
 
-        public static void PrintCurrentlyRunningProcesses(Tuple<double, double, List<Tuple<OSProcess, DateTime>>> data, bool clear)
+        public static void PrintCurrentlyRunningProcesses(Tuple<double, double, List<Tuple<OSProcess, DateTime>>> data)
         {
             if (clear)
                 Console.Clear();
