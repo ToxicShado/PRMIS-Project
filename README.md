@@ -9,18 +9,20 @@ This project is a **process control system** that consists of a **Server** and a
 -    **Manages system processes** and monitors **CPU & Memory Usage** of currently running tasks.
 -    **Handles automatic client connections** and updates the **process state**.
 -    Uses **TCP for reliable communication** and **UDP for initial client discovery**.
--    **Provides real-time process tracking**.
 ----------
 ### **🖥️ Task Manager Component**
 -    **Displays currently active processes** running on the Server.
--    **Provides a user-friendly interface for process monitoring and management**.
--    Uses **TCP for communication with the Server**.
+-    **Provides a stylish interface for process monitoring and management**.
+-    Uses **UDP for communication with the Server**.
+-    **Automatically starts**, connects to the **Server**, and **retrieves system state**.
+-    **Provides real-time process tracking**.
     
 ----------
 ### **🖥️ Client Component**
--    **Automatically starts**, connects to the **Server**, and **retrieves system state**.
 -    **Includes functionality for automatic process generation**.
 -    Uses **TCP for reliable communication** and **UDP for discovery**.
+-    **Ensures connection**, with increasing timeouts between retries.
+-    **Automatically closes** if the Server is closed to prevent unwanted errors.
     
 
 ----------
