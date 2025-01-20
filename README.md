@@ -1,6 +1,6 @@
 # 🖥️ Process Control System
 
-This project is a **process control system** that consists of a **Server** and a **Task Manager**, which communicate via **TCP and UDP sockets** to monitor processor and memory usage.
+This project is a **process control system** that consists of a **Server** and a **Cleint**, which communicate via **TCP and UDP sockets** to monitor processor and memory usage.
 
 ## 📜 Overview of the Project
 
