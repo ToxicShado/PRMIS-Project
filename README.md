@@ -16,6 +16,7 @@ This project is a **process control system** that consists of a **Server** and a
 -    Uses **UDP for communication with the Server**.
 -    **Automatically starts**, connects to the **Server**, and **retrieves system state**.
 -    **Provides real-time process tracking**.
+-    **Automatically closes** if the Server is closed to prevent unwanted errors.
     
 ----------
 ### **🖥️ Client Component**
@@ -24,7 +25,6 @@ This project is a **process control system** that consists of a **Server** and a
 -    **Ensures connection**, with increasing timeouts between retries.
 -    **Automatically closes** if the Server is closed to prevent unwanted errors.
     
-
 ----------
 
 ### **📡 Communication Flow**
@@ -32,14 +32,4 @@ This project is a **process control system** that consists of a **Server** and a
 1️⃣ **Client sends a registration request via UDP**  
 2️⃣ **Server responds with a TCP port assignment**  
 3️⃣ **Client establishes a TCP connection to the Server**  
-4️⃣ **Server continuously sends system stats & active processes**  
-
-## 🚀 Features
-✅ **UDP-based Client Registration** is used to obtain a dynamic TCP port.  
-✅ **Task Manager**: A stylish interface to track the current state of the Server. 
-✅ **Process Monitoring**: Tracks processor & memory usage.  
-✅ **Graceful Shutdown**: Server exits when Task Manager closes.
-✅ **Many [STATUS] and [INFO] updates** so that you may know *exactly* what is happening at any moment in time.  
-✅ **Error Handling** for connection failures & automatic retries.  ## 📜 **Project Overview**
-
-This project is a **multi-process control system** that monitors **CPU and memory usage** and manages active processes through a **client-server architecture**.
+4️⃣ **The communication ensues**  
