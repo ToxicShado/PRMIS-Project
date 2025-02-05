@@ -1,17 +1,20 @@
 ﻿using OSProcesses;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Client
 {
     public class ClientFunctions
     {
+        public static int ServerPID { get; private set; } = -1;
         public static bool SendProcessesToServer(List<OSProcess> processes, Socket tcpSocket)
         {
             Random random = new Random();
 
-            tcpSocket.Send(processes[0].ConvertProcessTotoBytecodeCSV());
+            tcpSocket.Send(processes[0].ToMemoryPack());
             Console.WriteLine($"[STATUS] Sent first process {processes[0]} to server.");
 
             byte[] messageData = new byte[4096];
@@ -31,7 +34,7 @@ namespace Client
                 {
                     Console.WriteLine($"[ERROR] Failed to send process {processes[0]}");
                     Task.Delay(random.Next(100, 2000)).Wait();
-                    tcpSocket.Send(processes[0].ConvertProcessTotoBytecodeCSV());
+                    tcpSocket.Send(processes[0].ToMemoryPack());
                     Console.WriteLine($"[STATUS] Retrying to send process {processes[0]}.");
 
                     messageData = new byte[4096];
@@ -42,7 +45,7 @@ namespace Client
                 }
                 else if (receivedMessage.StartsWith("NEXT"))
                 {
-                    tcpSocket.Send(processes[0].ConvertProcessTotoBytecodeCSV());
+                    tcpSocket.Send(processes[0].ToMemoryPack());
                     Console.WriteLine($"[STATUS] Sending next process {processes[0]}.");
 
                     messageData = new byte[4096];
@@ -55,7 +58,7 @@ namespace Client
                 Task.Delay(500).Wait();
             } while (processes.Count > 0);
 
-            tcpSocket.Send(Encoding.UTF8.GetBytes("EXIT"));
+            tcpSocket.Send(Encoding.UTF8.GetBytes("END"));
             Console.WriteLine("[STATUS] All processes sent. Connection should be closed by Server.");
             //tcpSocket.Close();
 
@@ -235,7 +238,39 @@ namespace Client
                 return null;
             }
 
+            byte[] messageData = new byte[4096];
+            tcpSocket.Receive(messageData);
+            ServerPID = int.Parse(Encoding.UTF8.GetString(messageData));
+
             return tcpSocket;
+        }
+
+        public static void AutomaticallyCloseClient()
+        {
+            if (ServerPID == -1)
+            {
+                return;
+            }
+            Thread thread = new Thread(() => CloseClient()) { IsBackground = true };
+            thread.Start();
+        }
+
+        public static void CloseClient()
+        {
+            Thread.Sleep(1000);
+            while (true)
+            {
+                try
+                {
+                    System.Diagnostics.Process process = System.Diagnostics.Process.GetProcessById(ServerPID);
+                }
+                catch
+                {
+                    Environment.Exit(0);
+                    return;
+                }
+                Thread.Sleep(100);
+            }
         }
     }
 }

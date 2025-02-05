@@ -1,4 +1,5 @@
-﻿using OSProcesses;
+﻿using MemoryPack;
+using OSProcesses;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -33,6 +34,7 @@ namespace Server
                 {
                     Console.WriteLine($"[INFO] Received: {receivedMessage}");
                     Console.WriteLine("[STATUS] Connection closed by Client request successfully");
+                    acceptedSocket.Shutdown(SocketShutdown.Both);
                     acceptedSocket.Close();
                     return 1;
                 }
@@ -40,12 +42,13 @@ namespace Server
                 {
                     Console.WriteLine($"[INFO] Received: {receivedMessage}");
                     Console.WriteLine("[STATUS] Connection closed by Client request successfully and the program should exit after you press any button.");
+                    acceptedSocket.Shutdown(SocketShutdown.Both);
                     acceptedSocket.Close();
                     return 2;
                 }
                 else
                 {
-                    OSProcess process = OperationsOnOSProcess.toProcess(acceptedBuffer, receivedBytes);
+                    OSProcess process = MemoryPackSerializer.Deserialize<OSProcess>(acceptedBuffer.AsSpan(0, receivedBytes));
                     Console.WriteLine($"\n[INFO] Received process details: {process}");
                     if (OS.IsTherePlaceForNewProcess(process))
                     {
@@ -199,6 +202,10 @@ namespace Server
                 return null;
             }
             Console.WriteLine();
+
+            int PID = System.Diagnostics.Process.GetCurrentProcess().Id;
+            acceptedSocket.Send(Encoding.UTF8.GetBytes(PID.ToString()));
+
             return acceptedSocket;
         }
     }

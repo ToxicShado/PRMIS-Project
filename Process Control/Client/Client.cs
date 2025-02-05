@@ -13,7 +13,7 @@ namespace Client
             Random random = new Random();
 
             Socket tcpSocket = ClientFunctions.InitialiseClientsideConnectionWithMultipleRetries();
-
+            ClientFunctions.AutomaticallyCloseClient();
             if (tcpSocket == null)
             {
                 Console.WriteLine("[ERROR] Connection failed");

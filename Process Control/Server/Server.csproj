@@ -8,9 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MemoryPack" Version="1.21.3" />
+    <PackageReference Include="MessagePack" Version="3.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Client\Client.csproj" />
     <ProjectReference Include="..\Process\OSProcesses.csproj" />
-    <ProjectReference Include="..\Task Manager\Task Manager.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,26 +1,28 @@
-﻿using OSProcesses;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 
 namespace Server
 {
     public class Server
     {
-        public double processorState { get; private set; }
-        public double memoryState { get; private set; }
-        public List<Tuple<OSProcess, DateTime>> RunningProcesses { get; private set; }
         public static void Main(string[] args)
         {
             // Open an instance of Task Manager, and connect to it.
 
             Console.Title = "Server";
 
+            OS OS = OS.getInstance();
             Console.WriteLine("[STATUS] Opening Task Manager...");
+
             if (OS.OpenTaskManagerAndConnectToIt() == false)
             {
                 Console.WriteLine("[ERROR] Failed to open Task Manager.");
                 return;
             }
-            Console.WriteLine("\n\n");
+            Console.WriteLine();
+
+            OS.PickScheduling();
+
+            Console.WriteLine();
 
             Console.WriteLine("[STATUS] Starting server...");
 
@@ -69,9 +71,17 @@ namespace Server
                     break;
                 }
             }
+
+            while(OS.areThereRunningProcesses())
+            {
+                Thread.Sleep(1000);
+            }
+
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Press any key (on the keyboard) to exit.");
             Console.ResetColor();
+            
+            
 
             //i am baffled by the stupidity of this
             //but either it's my fault or the fault of the console

@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MemoryPack" Version="1.21.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Process\OSProcesses.csproj" />
   </ItemGroup>
 

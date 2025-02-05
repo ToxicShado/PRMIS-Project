@@ -1,9 +1,11 @@
-﻿using System.Text;
+﻿using MemoryPack;
+using System.Text;
 
 
 namespace OSProcesses
 {
-    public class OSProcess
+    [MemoryPackable]
+    public partial class OSProcess
     {
         public string name { get; private set; } = "";
         public int timeToComplete { get; set; } = 0;
@@ -20,6 +22,7 @@ namespace OSProcesses
             this.processor = processor;
         }
 
+        [MemoryPackConstructor]
         public OSProcess()
         {
             name = "EMPTY";
@@ -27,6 +30,15 @@ namespace OSProcesses
             priority = -1;
             memory = -1;
             processor = -1;
+        }
+        public byte[] ToMemoryPack()
+        {
+            return MemoryPackSerializer.Serialize(this);
+        }
+
+        public static OSProcess FromMemoryPack(byte[] data)
+        {
+            return MemoryPackSerializer.Deserialize<OSProcess>(data);
         }
 
         public byte[] ConvertProcessTotoBytecodeCSV()

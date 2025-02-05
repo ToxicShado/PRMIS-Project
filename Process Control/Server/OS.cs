@@ -1,4 +1,5 @@
-﻿using OSProcesses;
+﻿using MemoryPack;
+using OSProcesses;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -6,33 +7,42 @@ using System.Text;
 
 namespace Server
 {
-    internal class OS
+    [MemoryPackable]
+    public partial class OS
     {
         public double processorState { get; private set; }
         public double memoryState { get; private set; }
-        public List<Tuple<OSProcess, DateTime>> RunningProcesses { get; private set; }
-        private static OS instance = null;
-        private readonly Mutex mutex;
+        public List<OSProcess> RunningProcesses { get; private set; }
+        [MemoryPackIgnore] private static OS instance = null;
+        [MemoryPackIgnore] private readonly Mutex mutex;
 
-        private static Socket TaskManagerSocket = null;
-        private static IPEndPoint TaskManagerEP = null;
-        private const int cpuQuant = 200;
+        [MemoryPackIgnore] private static Socket TaskManagerSocket = null;
+        [MemoryPackIgnore] private static IPEndPoint TaskManagerEP = null;
+        [MemoryPackIgnore] private const int cpuQuant = 200;
 
+
+        // // In case the thingy below doesn't work, this is the backup constructor
+        // // Honestly, it would not surprise me if it's needed.
+        //[MemoryPackConstructor]
+        //private OS(double ProcessorState, double MemoryState, List<OSProcess> RunningProcesses)
+        //{
+        //    processorState = ProcessorState;
+        //    memoryState = MemoryState; 
+        //    this.RunningProcesses = RunningProcesses ?? new List<OSProcess>();
+        //}
+
+        [MemoryPackConstructor]
         private OS()
         {
             processorState = 0;
             memoryState = 0;
-            RunningProcesses = new List<Tuple<OSProcess, DateTime>>();
+            RunningProcesses = new List<OSProcess>();
             mutex = new Mutex();
+        }
 
-            if (TaskManagerSocket == null)
-            {
-                Console.WriteLine("[ERROR] Connection failed");
-                return; //what does this return exactly? the whole server?
-            }
-
+        public void PickScheduling()
+        {
             // Here is the logic to determine .
-
             Console.WriteLine("Pick whether you wish to use Round Robin (1) or to sort by priority (2)");
             int choice = -1;
 
@@ -80,7 +90,7 @@ namespace Server
             return instance;
         }
 
-        public static bool OpenTaskManagerAndConnectToIt()
+        public bool OpenTaskManagerAndConnectToIt()
         {
             string currentPath = Directory.GetCurrentDirectory();
 
@@ -97,29 +107,28 @@ namespace Server
                 WindowStyle = ProcessWindowStyle.Normal  // Can be Minimized, Maximized, Hidden
             };
 
-            System.Diagnostics.Process taskManagerProcess = System.Diagnostics.Process.Start(psi);
+            Process taskManagerProcess = Process.Start(psi);
 
             Thread.Sleep(1000); // Wait for the Task Manager to start
 
             TaskManagerEP = new IPEndPoint(IPAddress.Loopback, 25566);
             TaskManagerSocket = InitialiseConnectionWithTaskManager();
 
-            if (TaskManagerSocket == null)
+            if (TaskManagerSocket == null || TaskManagerEP == null)
             {
-                Console.WriteLine("[ERROR] Connection failed");
+                Console.WriteLine("[ERROR] Connection failed with task manager");
                 return false;
             }
 
-            int PID = System.Diagnostics.Process.GetCurrentProcess().Id;
+            int PID = Process.GetCurrentProcess().Id;
             TaskManagerSocket.SendTo(Encoding.UTF8.GetBytes(PID.ToString()), TaskManagerEP);
 
-            //taskManagerProcess.WaitForExitAsync();
-            //Console.WriteLine("[Server] Task Manager.exe has exited. Closing Server...");
-
-            //// Step 6: Exit the Server process
-            //Environment.Exit(0);
-
             return true;
+        }
+
+        public static bool areThereRunningProcesses()
+        {
+            return instance.RunningProcesses.Any();
         }
 
         public bool IsTherePlaceForNewProcess(OSProcess process)
@@ -146,7 +155,7 @@ namespace Server
             try
             {
                 mutex.WaitOne();
-                RunningProcesses.Add(new Tuple<OSProcess, DateTime>(process, DateTime.Now));
+                RunningProcesses.Add(process);
                 processorState += process.processor;
                 memoryState += process.memory;
                 Console.WriteLine($"[OS] Process {process.ToString()} has started running.");
@@ -159,56 +168,39 @@ namespace Server
 
         }
 
-        public void RemoveProcessIfFinished()
-        {
-            try
-            {
-                mutex.WaitOne();
-                var ProccessesToRemove = new List<Tuple<OSProcess, DateTime>>();
-                foreach (Tuple<OSProcess, DateTime> process in RunningProcesses)
-                {
-                    if (DateTime.Now - process.Item2 > TimeSpan.FromMilliseconds(process.Item1.timeToComplete))
-                    {
-                        ProccessesToRemove.Add(process);
-                    }
-                }
-                foreach (Tuple<OSProcess, DateTime> process in ProccessesToRemove)
-                {
-                    RunningProcesses.Remove(process);
-                    processorState -= process.Item1.processor;
-                    memoryState -= process.Item1.memory;
-                    Console.WriteLine($"[OS] Process {process.ToString()} has stopped running.");
-                }
-                if (ProccessesToRemove.Count > 0)
-                    PrintCurrentlyRunningProcesses();
-            }
-            finally
-            {
-                mutex.ReleaseMutex();
-            }
-        }
-
         public void PrintCurrentlyRunningProcesses()
         {
-            byte[] messageData = ConvertOSToCSVAndThenToBytecode();
-            TaskManagerSocket.SendTo(messageData, TaskManagerEP);
+            if (TaskManagerSocket == null || TaskManagerEP == null)
+            {
+                Console.WriteLine("[ERROR] Task Manager Socket or Endpoint is null. Cannot send data.");
+                return;
+            }
+
+            if (RunningProcesses == null)
+            {
+                Console.WriteLine("[WARNING] RunningProcesses is null. Initializing an empty list.");
+                RunningProcesses = new List<OSProcess>();
+            }
+
+            try
+            {
+                byte[] serializedData = MemoryPackSerializer.Serialize(this);
+
+                if (serializedData == null || serializedData.Length == 0)
+                {
+                    Console.WriteLine("[ERROR] Serialization returned empty data.");
+                    return;
+                }
+
+                TaskManagerSocket.SendTo(serializedData, TaskManagerEP);
+                //Console.WriteLine("[INFO] Successfully sent OS data to Task Manager.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"[EXCEPTION] Failed to serialize and send OS data: {e.Message}");
+            }
         }
 
-        private byte[] ConvertOSToCSVAndThenToBytecode()
-        {
-            string csv = "";
-            csv += $"{processorState},{memoryState},";
-            if (RunningProcesses.Any())
-            {
-                foreach (Tuple<OSProcess, DateTime> process in RunningProcesses)
-                {
-                    csv += $"{process.Item1.name},{process.Item1.timeToComplete},{process.Item1.priority},{process.Item1.memory},{process.Item1.processor},{process.Item2},";
-                }
-                csv = csv.TrimEnd(',');
-            }
-            csv += "\n";
-            return System.Text.Encoding.UTF8.GetBytes(csv);
-        }
 
 
         private static Socket InitialiseConnectionWithTaskManager()
@@ -229,20 +221,6 @@ namespace Server
                 return null;
             }
 
-            //// Send a registration message to the server
-            //try
-            //{
-            //    string registrationMessage = "Could You Please Connect?";
-            //    byte[] registrationData = System.Text.Encoding.UTF8.GetBytes(registrationMessage);
-            //    udpSocket.SendTo(registrationData, serverEP);
-            //    Console.WriteLine("[STATUS] Sent registration message to server.");
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine($"[ERROR] Unable to send registration message to server at {serverEP.Address}:{serverEP.Port}.");
-            //    Console.WriteLine($"[EXCEPTION] {e}");
-            //    return null;
-            //}
             return udpSocket;
         }
 
@@ -265,7 +243,7 @@ namespace Server
                     for (int i = RunningProcesses.Count - 1; i >= 0; i--) // Iterate in reverse to remove safely
                     {
                         var processTuple = RunningProcesses[i];
-                        OSProcess process = processTuple.Item1;
+                        OSProcess process = processTuple;
 
                         process.timeToComplete -= cpuQuant;
 
@@ -286,9 +264,9 @@ namespace Server
 
                             Thread.Sleep(200); // Adjust delay for smoother transition
                         }
+                        PrintCurrentlyRunningProcesses();
                     }
                 }
-
                 Thread.Sleep(cpuQuant); // Adjust sleep duration as needed
             }
         }
