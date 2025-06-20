@@ -126,11 +126,13 @@ namespace Server
                     Thread.Sleep(500);
                 }
                 Console.WriteLine("[INFO] No activity for "+ SecondsToWaitForActivity + " seconds. Shutting down server...");
-                Thread.Sleep(500);
+                Thread.Sleep(2000);
+                Console.Clear();
                 Console.WriteLine("[STATUS] Printing statistics...");
-                Thread.Sleep(500);
-                // Exit the program 
-                
+                Thread.Sleep(2000);
+                Console.Clear();
+                Console.WriteLine("All processing took " + OS.totalProcessDuration / 1000.0f + " seconds.");
+
                 Environment.Exit(0);
 
             })
