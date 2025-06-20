@@ -30,7 +30,7 @@ namespace Client
 
             //OSProcess process = OperationsOnOSProcess.CreateProcess(); // This should be the way of  creating a process, but i dont feel like typing all the data in the console every. single. time.
             // so i will just create a processes like this "for now".
-            List<OSProcess> processes = OperationsOnOSProcess.GenerateNProcesses(5, true);
+            List<OSProcess> processes = OperationsOnOSProcess.GenerateNProcesses(3, true);
 
             ClientFunctions.SendProcessesToServer(processes, tcpSocket);
 

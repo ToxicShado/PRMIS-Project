@@ -1,5 +1,6 @@
 ﻿using MemoryPack;
 using OSProcesses;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -207,6 +208,30 @@ namespace Server
             acceptedSocket.Send(Encoding.UTF8.GetBytes(PID.ToString()));
 
             return acceptedSocket;
+        }
+
+        public static void StartNClients(int n)
+        {
+            string currentPath = Directory.GetCurrentDirectory();
+
+            // Navigate up three levels to the root directory (Process Control)
+            string projectRoot = Directory.GetParent(currentPath).Parent.Parent.Parent.FullName;
+
+            // Assemble the path to Client.exe
+            string clientPath = Path.Combine(projectRoot, "Client", "bin", "Debug", "net9.0", "Client.exe");
+
+            for (int i = 0; i < n; i++)
+            {
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = clientPath,
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Normal // Or Normal/Hidden as needed
+                };
+
+                Process.Start(psi);
+                Thread.Sleep(200); // Optional: stagger launches slightly
+            }
         }
     }
 }

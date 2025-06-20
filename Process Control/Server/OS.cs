@@ -74,6 +74,13 @@ namespace Server
                     break;
                 case 2:
                     Console.WriteLine("Priority Scheduling Activated!");
+                    scheduler = new Thread(() =>
+                    {
+                        PriorityScheduling();
+                    }
+                                      )
+                    { IsBackground = true };
+                    scheduler.Start();
                     break;
                 default:
                     Console.WriteLine("Invalid choice");
@@ -270,6 +277,60 @@ namespace Server
                 Thread.Sleep(cpuQuant); // Adjust sleep duration as needed
             }
         }
+
+        public void PriorityScheduling()
+        {
+            char[] loadingSymbols = { '\\', '|', '/', '-' };
+            int animationIndex = 0;
+
+            while (true)
+            {
+                lock (RunningProcesses) // Ensure thread safety
+                {
+                    if (RunningProcesses.Count == 0)
+                    {
+                        Thread.Sleep(cpuQuant);
+                        continue;
+                    }
+
+                    // Find the process with the highest priority
+                    int maxPriorityIndex = 0;
+                    for (int i = 1; i < RunningProcesses.Count; i++)
+                    {
+                        if (RunningProcesses[i].priority > RunningProcesses[maxPriorityIndex].priority)
+                        {
+                            maxPriorityIndex = i;
+                        }
+                    }
+
+                    OSProcess process = RunningProcesses[maxPriorityIndex];
+
+                    process.timeToComplete -= cpuQuant;
+
+                    // Clear the entire line before printing new output
+                    Console.Write("\r" + new string(' ', Console.WindowWidth - 1) + "\r");
+                    Console.Write($"{loadingSymbols[animationIndex]} Process name: {process.name} Priority: {process.priority} Remaining Time: {Math.Max(process.timeToComplete, 0)}");
+                    animationIndex = (animationIndex + 1) % loadingSymbols.Length; // Rotate symbols
+
+                    Thread.Sleep(cpuQuant); // For smoother transitions 
+
+                    if (process.timeToComplete <= 0)
+                    {
+                        Console.WriteLine($"\nProcess named {process.name} completed and removed.");
+                        RunningProcesses.RemoveAt(maxPriorityIndex);
+
+                        processorState -= process.processor;
+                        memoryState -= process.memory;
+
+                        Thread.Sleep(200); // Adjust delay for smoother transition
+                    }
+                    PrintCurrentlyRunningProcesses();
+                }
+
+                Thread.Sleep(cpuQuant); // Adjust sleep duration as needed
+            }
+        }
+
     }
 }
 
