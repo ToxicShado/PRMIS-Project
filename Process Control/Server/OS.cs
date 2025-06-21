@@ -19,6 +19,7 @@ namespace Server
         [MemoryPackIgnore] private static Socket TaskManagerSocket = null;
         [MemoryPackIgnore] private static IPEndPoint TaskManagerEP = null;
         [MemoryPackIgnore] private const int cpuQuant = 200;
+        [MemoryPackIgnore] public static int totalProcessDuration { get; private set; }
 
 
         // // In case the thingy below doesn't work, this is the backup constructor
@@ -38,6 +39,7 @@ namespace Server
             memoryState = 0;
             RunningProcesses = new List<OSProcess>();
             mutex = new Mutex();
+            totalProcessDuration = 0;
         }
 
         public void PickScheduling()
@@ -275,6 +277,7 @@ namespace Server
                     }
                 }
                 Thread.Sleep(cpuQuant); // Adjust sleep duration as needed
+                totalProcessDuration += cpuQuant;
             }
         }
 
@@ -328,6 +331,7 @@ namespace Server
                 }
 
                 Thread.Sleep(cpuQuant); // Adjust sleep duration as needed
+                totalProcessDuration += cpuQuant;
             }
         }
 
