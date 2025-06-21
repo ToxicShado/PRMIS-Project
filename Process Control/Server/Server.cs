@@ -12,7 +12,7 @@ namespace Server
         private static volatile bool isRunning = true;
 
         private static DateTime lastActivity = DateTime.Now;
-        const int SecondsToWaitForActivity = 10;
+        const int SecondsToWaitForActivity = 1000;
 
         public static void Main(string[] args)
         {

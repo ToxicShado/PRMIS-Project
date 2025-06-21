@@ -125,7 +125,6 @@ namespace Task_Manager
             return;
         }
 
-
         public static void PrintCurrentlyRunningProcesses(Tuple<double, double, List<OSProcess>> data)
         {
             if (data == null)
@@ -154,11 +153,10 @@ namespace Task_Manager
                 if (RunningProcesses.Count == 0)
                 {
                     Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════════╣");
-                    Console.WriteLine("║                        No processes are currently running                        ║");
-                    Console.WriteLine("║               ProTip: Add a process to make the system productive!               ║");
+                    Console.WriteLine($"║{CenterText(GetRandomNoProcessComment(), 82)}║");
                     Console.WriteLine("╠══════════════════════════════════════════════════════════════════════════════════╣");
-
                 }
+
                 else
                 {
                     Console.WriteLine("╠══════════════════════╤══════════════════╤════════════╤════════════╤══════════════╣");
@@ -225,6 +223,59 @@ namespace Task_Manager
             {
                 Console.ResetColor();
             }
+        }
+
+        private static readonly List<string> NoProcessComments = new()
+        {
+            "All quiet on the process front.",
+            "So empty, even the idle process left.",
+            "The calm before the code storm.",
+            "No processes detected. Did you try turning off and on again?",
+            "The system is as empty as my coffee cup.",
+            "No processes running. Time for a break?",
+            "It's so empty, you can hear the electrons.",
+            "Not a single process in sight. Suspiciously quiet...",
+            "All work and no play makes Jack... wait, there's no work.",
+            "If you stare long enough, maybe a process will appear.",
+            "Zero processes. Maximum chill.",
+            "Nothing running. Time to contemplate existence.",
+            "No processes found. Did you pay your electricity bill?",
+            "The only thing running is your imagination.",
+            "No processes detected. Is this a simulation?",
+            "No processes. Even Task Manager is bored.",
+            "No processes. Try turning it off and on again. Or just on.",
+            "No processes. The system is on a coffee break.",
+            "No processes. The CPU is meditating.",
+            "No processes. The electrons are on strike.",
+            "No processes. The system is in stealth mode.",
+            "Stealth mode: engaged.",
+            "Playing hide and seek with your processes.",
+            "Process list not found. Maybe check under the rug?",
+            "The void stares back.",
+            "Process population: zero. Party of one.",
+            "The system is practicing minimalism.",
+            "The digital tumbleweeds are rolling by.",
+            "No news is good news, right?",
+            "The computer is enjoying some me-time.",
+            "The process list is on a coffee run.", 
+        };
+
+        private static readonly Random _random = new();
+
+        private static string GetRandomNoProcessComment()
+        {
+            int idx = _random.Next(NoProcessComments.Count);
+            return NoProcessComments[idx];
+        }
+
+        private static string CenterText(string text, int width)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length >= width)
+                return text.PadRight(width);
+
+            int leftPadding = (width - text.Length) / 2;
+            int rightPadding = width - text.Length - leftPadding;
+            return new string(' ', leftPadding) + text + new string(' ', rightPadding);
         }
 
 
