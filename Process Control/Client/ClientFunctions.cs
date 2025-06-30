@@ -1,8 +1,6 @@
 ﻿using OSProcesses;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace Client

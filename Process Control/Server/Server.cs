@@ -1,6 +1,4 @@
-﻿using System.Net;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
+﻿using System.Net.Sockets;
 
 namespace Server
 {
@@ -12,7 +10,7 @@ namespace Server
         private static volatile bool isRunning = true;
 
         private static DateTime lastActivity = DateTime.Now;
-        const int SecondsToWaitForActivity = 1000;
+        const int SecondsToWaitForActivity = 30;
 
         public static void Main(string[] args)
         {
@@ -69,6 +67,8 @@ namespace Server
             // Thread 2: Listen for data on all clients
             Thread listenThread = new Thread(() =>
             {
+                int timeToComplete = -1;
+
                 while (isRunning)
                 {
                     List<Socket> readSockets;
@@ -88,19 +88,23 @@ namespace Server
 
                     if (readSockets.Count > 0)
                     {
-                        lastActivity = DateTime.Now; // Update last activity time
+                        lastActivity = DateTime.Now.AddMilliseconds(timeToComplete); // Update last activity time with offset
                     }
 
                     foreach (var clientSocket in readSockets)
                     {
                         int retVal = ServerFunctions.ReceiveProcesses(clientSocket);
-                        if (retVal == -1 || retVal == 1 || retVal == 2)
+                        if (retVal == -1 || retVal == -10 || retVal == -20)
                         {
                             // Remove closed/disconnected socket
                             lock (socketListLock)
                             {
                                 clientSockets.Remove(clientSocket);
                             }
+                        }
+                        else
+                        {
+                            timeToComplete = retVal;
                         }
                     }
                 }
@@ -125,12 +129,12 @@ namespace Server
                     }
                     Thread.Sleep(500);
                 }
-                Console.WriteLine("[INFO] No activity for "+ SecondsToWaitForActivity + " seconds. Shutting down server...");
+                Console.WriteLine("[INFO] No activity for " + SecondsToWaitForActivity + " seconds. Shutting down server...");
                 Thread.Sleep(2000);
-                Console.Clear();
+                //Console.Clear();
                 Console.WriteLine("[STATUS] Printing statistics...");
                 Thread.Sleep(2000);
-                Console.Clear();
+                //Console.Clear();
                 Console.WriteLine("All processing took " + OS.totalProcessDuration / 1000.0f + " seconds.");
 
                 Environment.Exit(0);

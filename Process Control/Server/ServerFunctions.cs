@@ -33,19 +33,19 @@ namespace Server
                 receivedMessage = Encoding.UTF8.GetString(acceptedBuffer, 0, receivedBytes);
                 if (receivedMessage == "END")
                 {
-                    Console.WriteLine($"[INFO] Received: {receivedMessage}");
+                    Console.WriteLine($"\n[INFO] Received: {receivedMessage}");
                     Console.WriteLine("[STATUS] Connection closed by Client request successfully");
                     acceptedSocket.Shutdown(SocketShutdown.Both);
                     acceptedSocket.Close();
-                    return 1;
+                    return -10;
                 }
                 else if (receivedMessage == "EXIT")
                 {
-                    Console.WriteLine($"[INFO] Received: {receivedMessage}");
+                    Console.WriteLine($"\n[INFO] Received: {receivedMessage}");
                     Console.WriteLine("[STATUS] Connection closed by Client request successfully and the program should exit after you press any button.");
                     acceptedSocket.Shutdown(SocketShutdown.Both);
                     acceptedSocket.Close();
-                    return 2;
+                    return -20;
                 }
                 else
                 {
@@ -55,17 +55,15 @@ namespace Server
                     {
                         OS.AddNewProcess(process);
                         acceptedSocket.Send(Encoding.UTF8.GetBytes("OK : Process added successfully"));
-                        Console.WriteLine($"[STATUS] Process {process} added successfully");
+                        Console.WriteLine($"[STATUS] Process {process} added successfully\n");
+                        return process.timeToComplete;
                     }
                     else
                     {
-                        Console.WriteLine("[INFO] Process cannot be added due to resource constraints");
+                        Console.WriteLine("[INFO] Process cannot be added due to resource constraints\n");
                         acceptedSocket.Send(Encoding.UTF8.GetBytes("ERR_0 : Process cannot be added due to resource constraints"));
                     }
-                    Console.WriteLine();
                 }
-
-
             }
             return 0;
         }

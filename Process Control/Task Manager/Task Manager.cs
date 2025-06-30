@@ -15,7 +15,7 @@ namespace Task_Manager
         static void Main(string[] args)
         {
             Console.Title = "Task Manager";
-            
+
             Socket socket = InitialiseServersideCommunication();
             if (socket == null)
             {
@@ -32,7 +32,7 @@ namespace Task_Manager
 
             while (true)
             {
-                
+
                 byte[] message = new byte[4096];
                 try
                 {
@@ -48,8 +48,8 @@ namespace Task_Manager
                 string receivedMessage = Encoding.UTF8.GetString(message);
                 Tuple<double, double, List<OSProcess>> data = null;
 
-                try 
-                { 
+                try
+                {
                     data = ConvertBytecodeToCSVandThenToString(message);
                 }
                 catch (Exception e)
@@ -257,7 +257,7 @@ namespace Task_Manager
             "The digital tumbleweeds are rolling by.",
             "No news is good news, right?",
             "The computer is enjoying some me-time.",
-            "The process list is on a coffee run.", 
+            "The process list is on a coffee run.",
         };
 
         private static readonly Random _random = new();
@@ -289,8 +289,8 @@ namespace Task_Manager
                 return null;
             }
 
-            try 
-            { 
+            try
+            {
                 serializableOS = MemoryPackSerializer.Deserialize<OS>(data);
             }
             catch (Exception e)
