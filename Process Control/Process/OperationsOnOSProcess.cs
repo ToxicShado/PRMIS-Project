@@ -93,7 +93,7 @@ namespace OSProcesses
                 {
                     break;
                 }
-                Console.WriteLine("Process name cannot be empty. Please try again.");
+                Console.WriteLine("Process name must be non-empty.");
             }
 
             // correct input must be gotten. we know users are not to be trusted
@@ -110,12 +110,12 @@ namespace OSProcesses
             // correct input must be gotten. we know users are not to be trusted
             while (true)
             {
-                Console.Write("Enter priority (positive integer): ");
-                if (int.TryParse(Console.ReadLine(), out priority) && priority > 0)
+                Console.Write("Enter priority (usually 0-9): ");
+                if (int.TryParse(Console.ReadLine(), out priority) && priority >= 0)
                 {
                     break;
                 }
-                Console.WriteLine("Invalid input. Priority must be a positive integer. Please try again.");
+                Console.WriteLine("Invalid input. Priority must be a positive integer");
             }
 
             // correct input must be gotten. we know users are not to be trusted
